@@ -1,0 +1,244 @@
+{
+  "character": {
+    "id": "character",
+    "name": "冒险者",
+    "profession": "未设定",
+    "level": 1,
+    "exp": 0,
+    "expToNextLevel": 100,
+    "totalExp": 0,
+    "lifeStage": "大学阶段",
+    "primaryGoalId": "goal-reading",
+    "createdAt": "2026-08-24T00:00:00.000Z",
+    "updatedAt": "2026-08-24T00:00:00.000Z"
+  },
+  "stats": {
+    "id": "stats",
+    "values": {
+      "technical": 0,
+      "intelligence": 0,
+      "creativity": 0,
+      "execution": 0,
+      "health": 0
+    },
+    "history": [
+      {
+        "id": "snapshot-initial",
+        "recordedAt": "2026-08-24T00:00:00.000Z",
+        "values": {
+          "technical": 0,
+          "intelligence": 0,
+          "creativity": 0,
+          "execution": 0,
+          "health": 0
+        },
+        "source": "seed",
+        "note": "初始属性"
+      }
+    ],
+    "updatedAt": "2026-08-24T00:00:00.000Z"
+  },
+  "skillCategories": [
+    {
+      "id": "category-computer",
+      "name": "计算机",
+      "description": "编程、工程与计算机基础",
+      "order": 1,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    },
+    {
+      "id": "category-mathematics",
+      "name": "数学",
+      "description": "数学基础与应用",
+      "order": 2,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    },
+    {
+      "id": "category-language",
+      "name": "语言",
+      "description": "语言学习与表达",
+      "order": 3,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    },
+    {
+      "id": "category-research",
+      "name": "科研",
+      "description": "研究方法与学术能力",
+      "order": 4,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    },
+    {
+      "id": "category-sports",
+      "name": "运动",
+      "description": "运动与体能训练",
+      "order": 5,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    }
+  ],
+  "skills": [
+    {
+      "id": "skill-cpp",
+      "categoryId": "category-computer",
+      "parentId": null,
+      "name": "C++",
+      "level": 1,
+      "exp": 0,
+      "expToNextLevel": 100,
+      "description": "掌握 C++ 基础与工程实践",
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    }
+  ],
+  "goals": [
+    {
+      "id": "goal-reading",
+      "parentId": null,
+      "name": "一年读完 12 本书",
+      "type": "major",
+      "description": "建立扎实的算法、工程与研究能力",
+      "deadline": null,
+      "status": "active",
+      "progress": 0,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "task-first-step",
+      "goalId": "goal-reading",
+      "name": "完成第一个学习任务",
+      "type": "学习",
+      "description": "完成一个 C++ 基础章节并记录收获",
+      "dueDate": null,
+      "status": "todo",
+      "rewards": {
+        "exp": 20,
+        "stats": {
+          "technical": 2,
+          "execution": 1
+        },
+        "skills": [
+          {
+            "skillId": "skill-cpp",
+            "amount": 20
+          }
+        ],
+        "bosses": [
+          {
+            "bossId": "boss-ai-foundation",
+            "damage": 10
+          }
+        ]
+      },
+      "completedAt": null,
+      "rewardApplied": false,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    }
+  ],
+  "achievements": [
+    {
+      "id": "achievement-new-adventure",
+      "name": "新的冒险",
+      "icon": "🏆",
+      "description": "开始使用 Life RPG 记录成长",
+      "unlockType": "manual",
+      "unlockedAt": "2026-08-24T00:00:00.000Z",
+      "trigger": null,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    }
+  ],
+  "equipment": [
+    {
+      "id": "equipment-computer",
+      "name": "轻便背包",
+      "quality": "common",
+      "description": "用于学习、编程和完成项目的设备",
+      "statBonuses": {
+        "technical": 1
+      },
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    }
+  ],
+  "events": [
+    {
+      "id": "event-journey-started",
+      "date": "2026-08-24T00:00:00.000Z",
+      "title": "人生冒险启程",
+      "description": "创建了第一份 Life RPG 存档",
+      "rewards": {
+        "exp": 0,
+        "stats": {},
+        "skills": [],
+        "bosses": []
+      },
+      "sourceType": "manual",
+      "sourceId": null,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    }
+  ],
+  "bosses": [
+    {
+      "id": "boss-ai-foundation",
+      "goalId": "goal-reading",
+      "name": "阅读马拉松",
+      "description": "通过持续学习击破基础知识难关",
+      "maxHp": 100,
+      "currentHp": 100,
+      "deadline": null,
+      "status": "active",
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    }
+  ],
+  "timeline": [
+    {
+      "id": "timeline-start",
+      "parentId": null,
+      "title": "大学阶段",
+      "description": "积累专业基础并探索长期方向",
+      "stageType": "education",
+      "status": "current",
+      "startDate": null,
+      "endDate": null,
+      "order": 1,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    },
+    {
+      "id": "timeline-research",
+      "parentId": "timeline-start",
+      "title": "积累阶段",
+      "description": "确定研究主题并形成专业能力",
+      "stageType": "research",
+      "status": "future",
+      "startDate": null,
+      "endDate": null,
+      "order": 2,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    },
+    {
+      "id": "timeline-career",
+      "parentId": "timeline-research",
+      "title": "职业阶段",
+      "description": "将积累的能力投入真实职业挑战",
+      "stageType": "career",
+      "status": "future",
+      "startDate": null,
+      "endDate": null,
+      "order": 3,
+      "createdAt": "2026-08-24T00:00:00.000Z",
+      "updatedAt": "2026-08-24T00:00:00.000Z"
+    }
+  ]
+}

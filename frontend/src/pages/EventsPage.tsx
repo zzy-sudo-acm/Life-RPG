@@ -1,0 +1,117 @@
+import { CalendarDays, Pencil, Plus, Trash2 } from 'lucide-react'
+import { useState } from 'react'
+import { EventEditor } from '../components/events/EventEditor'
+import { RewardSummary } from '../components/events/RewardSummary'
+import { Button } from '../components/ui/Button'
+import { EmptyState } from '../components/ui/EmptyState'
+import { PageHeader } from '../components/ui/PageHeader'
+import { Panel } from '../components/ui/Panel'
+import { useAppStore } from '../store/AppStoreContext'
+import type { LifeEvent } from '../types/models'
+import { formatDate } from '../utils/format'
+
+const SOURCE_LABELS: Record<LifeEvent['sourceType'], string> = {
+  manual: '手动记录',
+  task: '任务自动记录',
+  achievement: '成就自动记录',
+  boss: 'Boss 自动记录',
+}
+
+export function EventsPage() {
+  const { data, saveEntity, deleteEntity } = useAppStore()
+  const [editor, setEditor] = useState<LifeEvent | null | 'new'>(null)
+  const [error, setError] = useState<string | null>(null)
+
+  if (!data) return null
+
+  const sortedEvents = data.events.toSorted((left, right) =>
+    right.date.localeCompare(left.date) || right.createdAt.localeCompare(left.createdAt),
+  )
+
+  const handleDelete = (lifeEvent: LifeEvent) => {
+    const sourceWarning = lifeEvent.sourceType === 'manual'
+      ? ''
+      : '这是系统自动生成的历史记录。'
+    if (!window.confirm(`${sourceWarning}确定删除“${lifeEvent.title}”吗？`)) return
+
+    setError(null)
+    void deleteEntity('events', lifeEvent.id).catch((reason: unknown) => {
+      setError(reason instanceof Error ? reason.message : '删除事件失败')
+    })
+  }
+
+  return (
+    <div className="space-y-6">
+      <PageHeader
+        title="人生日志"
+        description="按时间记录重要经历；任务和 Boss 结算产生的事件会标明自动来源。"
+        action={
+          <Button icon={<Plus size={16} />} onClick={() => setEditor('new')}>
+            添加事件
+          </Button>
+        }
+      />
+
+      {error ? <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-danger">{error}</p> : null}
+
+      {sortedEvents.length === 0 ? (
+        <EmptyState
+          title="还没有人生事件"
+          description="完成项目、比赛获奖或一个学习阶段，都值得留下记录。"
+          action={<Button onClick={() => setEditor('new')}>添加第一条事件</Button>}
+        />
+      ) : (
+        <ol className="space-y-4">
+          {sortedEvents.map((lifeEvent) => (
+            <li key={lifeEvent.id}>
+              <Panel className="p-5">
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h2 className="font-semibold text-ink">{lifeEvent.title}</h2>
+                      <span className={`rounded-md px-2 py-1 text-xs font-medium ${
+                        lifeEvent.sourceType === 'manual'
+                          ? 'bg-[#f0f2f0] text-muted'
+                          : 'bg-primary-soft text-primary'
+                      }`}>
+                        {SOURCE_LABELS[lifeEvent.sourceType]}
+                      </span>
+                    </div>
+                    <p className="mt-2 flex items-center gap-1.5 text-xs text-muted">
+                      <CalendarDays size={14} /> {formatDate(lifeEvent.date)}
+                      {lifeEvent.sourceId ? ` · 来源 ID：${lifeEvent.sourceId}` : ''}
+                    </p>
+                    <p className="mt-3 whitespace-pre-wrap text-sm text-muted">
+                      {lifeEvent.description || '暂无描述'}
+                    </p>
+                    <div className="mt-4">
+                      <RewardSummary rewards={lifeEvent.rewards} skills={data.skills} bosses={data.bosses} />
+                    </div>
+                  </div>
+                  <div className="flex shrink-0 gap-2 self-end sm:self-start">
+                    <Button variant="ghost" icon={<Pencil size={15} />} onClick={() => setEditor(lifeEvent)}>
+                      编辑
+                    </Button>
+                    <Button variant="ghost" icon={<Trash2 size={15} />} onClick={() => handleDelete(lifeEvent)}>
+                      删除
+                    </Button>
+                  </div>
+                </div>
+              </Panel>
+            </li>
+          ))}
+        </ol>
+      )}
+
+      {editor !== null ? (
+        <EventEditor
+          lifeEvent={editor === 'new' ? null : editor}
+          skills={data.skills}
+          bosses={data.bosses}
+          onClose={() => setEditor(null)}
+          onSave={(lifeEvent) => saveEntity('events', lifeEvent)}
+        />
+      ) : null}
+    </div>
+  )
+}

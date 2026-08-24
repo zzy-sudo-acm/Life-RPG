@@ -1,0 +1,10 @@
+.DS_Store
+.idea/
+.vscode/
+frontend/node_modules/
+frontend/dist/
+frontend/coverage/
+frontend/*.local
+frontend/src/assets/hero.png
+docs/design/
+npm-debug.log*

@@ -1,0 +1,77 @@
+@import "tailwindcss";
+
+@theme {
+  --color-canvas: #f6f7f4;
+  --color-surface: #ffffff;
+  --color-sidebar: #101a1d;
+  --color-ink: #17201d;
+  --color-muted: #66736e;
+  --color-line: #dfe5e1;
+  --color-primary: #176b4d;
+  --color-primary-soft: #e9f3ee;
+  --color-exp: #d9850b;
+  --color-danger: #c94b43;
+  --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+}
+:root {
+  font-family: var(--font-sans);
+  color: var(--color-ink);
+  background: var(--color-canvas);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  min-width: 320px;
+  background: var(--color-canvas);
+}
+
+body {
+  min-width: 320px;
+  min-height: 100vh;
+  margin: 0;
+  background: var(--color-canvas);
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:not(:disabled),
+a,
+select:not(:disabled),
+input[type='checkbox']:not(:disabled) {
+  cursor: pointer;
+}
+
+::selection {
+  color: white;
+  background: var(--color-primary);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+  }
+}
