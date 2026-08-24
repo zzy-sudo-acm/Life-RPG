@@ -18,6 +18,7 @@ import { EmptyState } from '../components/ui/EmptyState'
 import { PageHeader } from '../components/ui/PageHeader'
 import { Panel } from '../components/ui/Panel'
 import { ProgressBar } from '../components/ui/ProgressBar'
+import { ProgressRing } from '../components/ui/ProgressRing'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { useAppStore } from '../store/AppStoreContext'
 import {
@@ -267,36 +268,56 @@ export function GoalsTasksPage() {
                         </p>
                       ) : null}
                     </div>
-                    <div className="flex shrink-0 gap-1">
-                      <Button
-                        variant="ghost"
-                        className="min-h-9 px-2"
-                        aria-label={`编辑目标：${goal.name}`}
-                        onClick={() => openGoal(goal)}
-                      >
-                        <Pencil size={15} />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        className="min-h-9 px-2 text-danger hover:bg-danger-soft hover:text-danger"
-                        aria-label={`删除目标：${goal.name}`}
-                        onClick={() => void handleDeleteGoal(goal).catch(() => undefined)}
-                      >
-                        <Trash2 size={15} />
-                      </Button>
+                    <div className="flex shrink-0 items-start gap-2">
+                      {isMajor ? (
+                        <ProgressRing
+                          value={goal.progress}
+                          size={64}
+                          tone={goal.status === 'completed' ? 'primary' : 'exp'}
+                          ariaLabel={`${goal.name} 进度 ${goal.progress}%`}
+                        >
+                          <span className="font-display text-sm font-bold tabular-nums text-ink">
+                            {goal.progress}%
+                          </span>
+                        </ProgressRing>
+                      ) : null}
+                      <div className="flex gap-1">
+                        <Button
+                          variant="ghost"
+                          className="min-h-9 px-2"
+                          aria-label={`编辑目标：${goal.name}`}
+                          onClick={() => openGoal(goal)}
+                        >
+                          <Pencil size={15} />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="min-h-9 px-2 text-danger hover:bg-danger-soft hover:text-danger"
+                          aria-label={`删除目标：${goal.name}`}
+                          onClick={() => void handleDeleteGoal(goal).catch(() => undefined)}
+                        >
+                          <Trash2 size={15} />
+                        </Button>
+                      </div>
                     </div>
                   </div>
                   {goal.description ? (
                     <p className="mt-3 text-sm leading-6 text-muted">{goal.description}</p>
                   ) : null}
-                  <div className="mt-4">
-                    <ProgressBar
-                      value={goal.progress}
-                      tone={goal.status === 'completed' ? 'primary' : 'exp'}
-                      label={`进度 · ${goal.progress}%`}
-                    />
-                  </div>
-                  <p className="mt-3 text-xs text-faint">截止：{formatDate(goal.deadline)}</p>
+                  {isMajor ? (
+                    <p className="mt-3 text-xs text-faint">截止：{formatDate(goal.deadline)}</p>
+                  ) : (
+                    <>
+                      <div className="mt-4">
+                        <ProgressBar
+                          value={goal.progress}
+                          tone={goal.status === 'completed' ? 'primary' : 'exp'}
+                          label={`进度 · ${goal.progress}%`}
+                        />
+                      </div>
+                      <p className="mt-3 text-xs text-faint">截止：{formatDate(goal.deadline)}</p>
+                    </>
+                  )}
                 </Panel>
               )
             })}

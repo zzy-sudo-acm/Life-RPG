@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import type { StatKey, StatSnapshot } from '../../types/models'
 import { STAT_KEYS, STAT_LABELS } from '../../types/models'
+import { cn } from '../../utils/cn'
 import { clamp } from '../../utils/format'
 import { STAT_COLORS } from './statPalette'
 
@@ -28,6 +30,8 @@ interface StatTrendChartProps {
 }
 
 export function StatTrendChart({ history }: StatTrendChartProps) {
+  const [selected, setSelected] = useState<StatKey | null>(null)
+
   const points = history
     .toSorted((a, b) => a.recordedAt.localeCompare(b.recordedAt))
     .slice(-8)
@@ -45,19 +49,39 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
     return <p className="py-16 text-center text-sm text-muted">还没有属性趋势记录</p>
   }
 
+  const baseline = yFor(0, chartMaximum)
+
   return (
     <div>
-      <div className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted">
-        {STAT_KEYS.map((key: StatKey) => (
-          <span key={key} className="inline-flex items-center gap-1.5">
-            <span
-              className="size-2 rotate-45"
-              style={{ backgroundColor: STAT_COLORS[key] }}
-            />
-            {STAT_LABELS[key]}
-          </span>
-        ))}
+      {/* 图例即开关：点击单独高亮一条属性线 */}
+      <div className="mb-4 flex flex-wrap gap-2" role="group" aria-label="属性图例筛选">
+        {STAT_KEYS.map((key: StatKey) => {
+          const active = selected === key
+          return (
+            <button
+              key={key}
+              type="button"
+              aria-pressed={active}
+              onClick={() => setSelected((current) => (current === key ? null : key))}
+              className={cn(
+                'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs transition-all',
+                active
+                  ? 'border-transparent text-[#fbf7ee]'
+                  : 'border-line bg-surface text-muted hover:text-ink',
+                selected !== null && !active && 'opacity-45',
+              )}
+              style={active ? { backgroundColor: STAT_COLORS[key] } : undefined}
+            >
+              <span
+                className="size-2 rotate-45"
+                style={{ backgroundColor: active ? '#fbf7ee' : STAT_COLORS[key] }}
+              />
+              {STAT_LABELS[key]}
+            </button>
+          )
+        })}
       </div>
+
       <div className="overflow-x-auto">
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
@@ -105,14 +129,24 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
               value: point.values[key],
             }))
             const linePoints = coordinates.map(({ x, y }) => `${x},${y}`).join(' ')
+            const areaPoints = `${linePoints} ${coordinates[coordinates.length - 1]?.x ?? PADDING.left},${baseline} ${coordinates[0]?.x ?? PADDING.left},${baseline}`
+            const dimmed = selected !== null && selected !== key
+            const highlighted = selected === key
             return (
-              <g key={key}>
+              <g
+                key={key}
+                className="transition-opacity duration-300"
+                opacity={dimmed ? 0.14 : 1}
+              >
+                {highlighted && points.length > 1 ? (
+                  <polygon points={areaPoints} fill={STAT_COLORS[key]} opacity="0.12" />
+                ) : null}
                 {points.length > 1 ? (
                   <polyline
                     points={linePoints}
                     fill="none"
                     stroke={STAT_COLORS[key]}
-                    strokeWidth="2"
+                    strokeWidth={highlighted ? 2.8 : 2}
                     strokeLinejoin="round"
                     strokeLinecap="round"
                   />
@@ -122,7 +156,7 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
                     key={`${key}-${points[index]?.id}`}
                     cx={x}
                     cy={y}
-                    r="3"
+                    r={highlighted ? 4 : 3}
                     fill={STAT_COLORS[key]}
                     stroke="#fbf7ee"
                     strokeWidth="1.5"

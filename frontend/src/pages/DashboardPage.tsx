@@ -2,6 +2,7 @@ import {
   Activity,
   ArrowDown,
   ArrowUp,
+  CalendarDays,
   Check,
   ChevronRight,
   Minus,
@@ -12,12 +13,14 @@ import {
 } from 'lucide-react'
 import { useMemo, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
+import { ActivityHeatmap } from '../components/dashboard/ActivityHeatmap'
 import { CharacterHero } from '../components/dashboard/CharacterHero'
 import { StatsRadar } from '../components/dashboard/StatsRadar'
 import { STAT_COLORS } from '../components/dashboard/statPalette'
 import { StatTrendChart } from '../components/dashboard/StatTrendChart'
 import { RewardCelebration } from '../components/feedback/RewardCelebration'
 import { useRewardCelebration } from '../components/feedback/useRewardCelebration'
+import { TierDonut } from '../components/skills/TierDonut'
 import { Button } from '../components/ui/Button'
 import { FormField, inputClassName } from '../components/ui/FormField'
 import { Modal } from '../components/ui/Modal'
@@ -196,6 +199,19 @@ export function DashboardPage() {
         </Panel>
       </section>
 
+      {/* 修炼足迹热力图 */}
+      <Panel className="p-5 sm:p-6">
+        <div className="flex items-center justify-between">
+          <h2 className="flex items-center gap-2 font-display font-bold text-ink">
+            <CalendarDays size={18} className="text-primary" /> 修炼足迹
+          </h2>
+          <SectionLink to="/events" label="人生日志" />
+        </div>
+        <div className="mt-4">
+          <ActivityHeatmap events={data.events} />
+        </div>
+      </Panel>
+
       <section className="grid gap-5 lg:grid-cols-3">
         {/* 属性趋势 */}
         <Panel className="p-5 sm:p-6 lg:col-span-2">
@@ -253,13 +269,16 @@ export function DashboardPage() {
         {/* 技能概览 */}
         <Panel className="p-5 sm:p-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-ink">技能概览</h2>
+            <h2 className="font-display font-bold text-ink">技能概览</h2>
             <div className="flex items-center gap-3">
               <span className="text-xs text-faint">{data.skills.length} 项技能</span>
               <SectionLink to="/skills" label="技能树" />
             </div>
           </div>
-          <ul className="mt-4 space-y-4">
+          <div className="mt-4">
+            <TierDonut skills={data.skills} />
+          </div>
+          <ul className="mt-5 space-y-4 border-t border-line/70 pt-4">
             {featuredSkills.length > 0 ? (
               featuredSkills.map((skill) => (
                 <li key={skill.id}>

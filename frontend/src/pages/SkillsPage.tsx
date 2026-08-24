@@ -2,32 +2,17 @@ import { GitBranch, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { SkillCategoryEditor } from '../components/skills/SkillCategoryEditor'
 import { SkillEditor } from '../components/skills/SkillEditor'
+import { skillTier } from '../components/skills/skillTiers'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { PageHeader } from '../components/ui/PageHeader'
 import { Panel } from '../components/ui/Panel'
 import { ProgressBar } from '../components/ui/ProgressBar'
+import { ProgressRing } from '../components/ui/ProgressRing'
 import { useAppStore } from '../store/AppStoreContext'
 import type { Skill, SkillCategory } from '../types/models'
+import { clamp } from '../utils/format'
 import { cn } from '../utils/cn'
-
-/** 技能段位：纯展示层映射，按等级划分成长阶段。 */
-interface SkillTier {
-  label: string
-  color: string
-}
-
-function skillTier(skill: Skill): SkillTier {
-  if (skill.level >= 20) return { label: '大师', color: '#a97c1f' }
-  if (skill.level >= 10) return { label: '精通', color: '#6a5a8a' }
-  if (skill.level >= 5) return { label: '熟练', color: '#4a6a8a' }
-  return { label: '入门', color: '#4a7a5e' }
-}
-
-/** 尚未投入任何经验的技能显示为「未点亮」状态。 */
-function isUntouched(skill: Skill): boolean {
-  return skill.level <= 1 && skill.exp === 0
-}
 
 function buildChildrenMap(skills: Skill[]): Map<string | null, Skill[]> {
   const skillIds = new Set(skills.map((skill) => skill.id))
@@ -61,7 +46,7 @@ interface SkillBranchProps {
 
 function SkillBranch({ skill, childrenMap, onEdit, onDelete }: SkillBranchProps) {
   const tier = skillTier(skill)
-  const untouched = isUntouched(skill)
+  const untouched = tier.id === 'untouched'
   const children = childrenMap.get(skill.id) ?? []
 
   return (
@@ -92,7 +77,7 @@ function SkillBranch({ skill, childrenMap, onEdit, onDelete }: SkillBranchProps)
                 color: tier.color,
               }}
             >
-              {untouched ? '未点亮' : tier.label}
+              {tier.label}
             </span>
           </div>
           {skill.description ? (
@@ -243,6 +228,17 @@ export function SkillsPage() {
             const childrenMap = buildChildrenMap(categorySkills)
             const roots = childrenMap.get(null) ?? []
             const totalLevels = categorySkills.reduce((sum, skill) => sum + skill.level, 0)
+            const mastery = categorySkills.length === 0
+              ? 0
+              : Math.round(
+                  (categorySkills.reduce(
+                    (sum, skill) =>
+                      sum + clamp(skill.exp / Math.max(1, skill.expToNextLevel), 0, 1),
+                    0,
+                  ) /
+                    categorySkills.length) *
+                    100,
+                )
 
             return (
               <Panel key={category.id} className="overflow-hidden">
@@ -259,32 +255,47 @@ export function SkillsPage() {
                       <p className="mt-1 text-sm text-muted">{category.description}</p>
                     ) : null}
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    <Button
-                      variant="secondary"
-                      icon={<Plus size={15} />}
-                      onClick={() => openNewSkill(category.id)}
-                    >
-                      添加技能
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="min-h-9 px-2"
-                      aria-label={`编辑分类：${category.name}`}
-                      onClick={() => openCategory(category)}
-                    >
-                      <Pencil size={15} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="min-h-9 px-2 text-danger hover:bg-danger-soft hover:text-danger"
-                      aria-label={`删除分类：${category.name}`}
-                      onClick={() =>
-                        void handleDeleteCategory(category).catch(() => undefined)
-                      }
-                    >
-                      <Trash2 size={15} />
-                    </Button>
+                  <div className="flex flex-wrap items-center gap-4">
+                    <span className="flex flex-col items-center gap-1" title="分类内各技能当前经验的平均进度">
+                      <ProgressRing
+                        value={mastery}
+                        size={52}
+                        tone="primary"
+                        ariaLabel={`${category.name} 修行进度 ${mastery}%`}
+                      >
+                        <span className="text-[11px] font-bold tabular-nums text-primary-deep">
+                          {mastery}%
+                        </span>
+                      </ProgressRing>
+                      <span className="text-[10px] text-faint">修行进度</span>
+                    </span>
+                    <div className="flex flex-wrap gap-2">
+                      <Button
+                        variant="secondary"
+                        icon={<Plus size={15} />}
+                        onClick={() => openNewSkill(category.id)}
+                      >
+                        添加技能
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="min-h-9 px-2"
+                        aria-label={`编辑分类：${category.name}`}
+                        onClick={() => openCategory(category)}
+                      >
+                        <Pencil size={15} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="min-h-9 px-2 text-danger hover:bg-danger-soft hover:text-danger"
+                        aria-label={`删除分类：${category.name}`}
+                        onClick={() =>
+                          void handleDeleteCategory(category).catch(() => undefined)
+                        }
+                      >
+                        <Trash2 size={15} />
+                      </Button>
+                    </div>
                   </div>
                 </header>
 
