@@ -11,7 +11,7 @@ import { StatusBadge } from '../components/ui/StatusBadge'
 import { useAppStore } from '../store/AppStoreContext'
 import type { Boss } from '../types/models'
 import { cn } from '../utils/cn'
-import { formatDate, formatNumber } from '../utils/format'
+import { formatDate, formatNumber, daysUntil } from '../utils/format'
 
 export function BossesPage() {
   const { data, saveEntity, deleteEntity, damageBoss } = useAppStore()
@@ -21,7 +21,7 @@ export function BossesPage() {
 
   if (data === null) return null
 
-  const goalNames = new Map(data.goals.map((goal) => [goal.id, goal.name]))
+  const goalById = new Map(data.goals.map((goal) => [goal.id, goal]))
   const bosses = data.bosses.toSorted((left, right) => {
     const statusOrder: Record<Boss['status'], number> = {
       active: 0,
@@ -136,9 +136,33 @@ export function BossesPage() {
                     <p className="mt-1 text-xs text-faint">
                       {boss.goalId === null
                         ? '未关联目标'
-                        : `目标：${goalNames.get(boss.goalId) ?? '未知目标'}`}
-                      {' · '}期限：{formatDate(boss.deadline)}
+                        : `目标：${goalById.get(boss.goalId)?.name ?? '未知目标'}`}
                     </p>
+                    {(() => {
+                      // 悬赏期限：Boss 自己没设就沿用关联目标的期限
+                      const deadline =
+                        boss.deadline ??
+                        (boss.goalId !== null ? goalById.get(boss.goalId)?.deadline ?? null : null)
+                      const daysLeft = daysUntil(deadline)
+                      if (!deadline) return null
+                      return (
+                        <p className="mt-1 flex flex-wrap items-center gap-1.5 text-xs text-faint">
+                          期限 {formatDate(deadline)}
+                          {daysLeft !== null && !defeated ? (
+                            <span
+                              className={cn(
+                                'rounded-full px-1.5 py-px font-semibold',
+                                daysLeft <= 60
+                                  ? 'bg-danger-soft text-danger'
+                                  : 'bg-exp-soft text-exp',
+                              )}
+                            >
+                              {daysLeft >= 0 ? `还剩 ${daysLeft} 天` : `已逾 ${-daysLeft} 天`}
+                            </span>
+                          ) : null}
+                        </p>
+                      )
+                    })()}
                   </div>
                 </div>
 

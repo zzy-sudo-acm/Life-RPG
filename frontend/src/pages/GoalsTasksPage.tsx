@@ -29,8 +29,31 @@ import {
   type TaskStatus,
 } from '../types/models'
 import { cn } from '../utils/cn'
-import { formatDate } from '../utils/format'
+import { daysUntil, formatDate } from '../utils/format'
 import { nowIso } from '../utils/id'
+
+/** 目标期限：无期限时不占位；有期限时附倒计时 */
+function GoalDeadline({ deadline, done }: { deadline: string | null; done: boolean }) {
+  const daysLeft = daysUntil(deadline)
+  if (!deadline) return null
+  return (
+    <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-faint">
+      截止：{formatDate(deadline)}
+      {daysLeft !== null && !done ? (
+        <span
+          className={cn(
+            'rounded-full px-1.5 py-px font-semibold',
+            daysLeft > 60
+              ? 'bg-exp-soft text-exp'
+              : 'bg-danger-soft text-danger',
+          )}
+        >
+          {daysLeft >= 0 ? `还剩 ${daysLeft} 天` : `已逾 ${-daysLeft} 天`}
+        </span>
+      ) : null}
+    </p>
+  )
+}
 
 interface GoalRow {
   goal: Goal
@@ -305,7 +328,7 @@ export function GoalsTasksPage() {
                     <p className="mt-3 text-sm leading-6 text-muted">{goal.description}</p>
                   ) : null}
                   {isMajor ? (
-                    <p className="mt-3 text-xs text-faint">截止：{formatDate(goal.deadline)}</p>
+                    <GoalDeadline deadline={goal.deadline} done={goal.status === 'completed'} />
                   ) : (
                     <>
                       <div className="mt-4">
@@ -315,7 +338,7 @@ export function GoalsTasksPage() {
                           label={`进度 · ${goal.progress}%`}
                         />
                       </div>
-                      <p className="mt-3 text-xs text-faint">截止：{formatDate(goal.deadline)}</p>
+                      <GoalDeadline deadline={goal.deadline} done={goal.status === 'completed'} />
                     </>
                   )}
                 </Panel>

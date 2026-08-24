@@ -34,7 +34,7 @@ import {
   type StatKey,
   type Task,
 } from '../types/models'
-import { formatDate, formatNumber, toNumber } from '../utils/format'
+import { daysUntil, formatDate, formatNumber, toNumber } from '../utils/format'
 
 function SectionLink({ to, label }: { to: string; label: string }) {
   return (
@@ -249,7 +249,29 @@ export function DashboardPage() {
                   label={`HP ${formatNumber(activeBoss.currentHp)} / ${formatNumber(activeBoss.maxHp)}`}
                 />
               </div>
-              <p className="mt-4 text-xs text-faint">截止：{formatDate(activeBoss.deadline)}</p>
+              {(() => {
+                // 期限：Boss 未单独设置时沿用关联目标的期限
+                const deadline =
+                  activeBoss.deadline ??
+                  data.goals.find((goal) => goal.id === activeBoss.goalId)?.deadline ??
+                  null
+                const daysLeft = daysUntil(deadline)
+                if (!deadline) return null
+                return (
+                  <p className="mt-4 flex flex-wrap items-center gap-1.5 text-xs text-faint">
+                    截止：{formatDate(deadline)}
+                    {daysLeft !== null ? (
+                      <span
+                        className={`rounded-full px-1.5 py-px font-semibold ${
+                          daysLeft <= 60 ? 'bg-danger-soft text-danger' : 'bg-exp-soft text-exp'
+                        }`}
+                      >
+                        {daysLeft >= 0 ? `还剩 ${daysLeft} 天` : `已逾 ${-daysLeft} 天`}
+                      </span>
+                    ) : null}
+                  </p>
+                )
+              })()}
               <Link
                 to="/bosses"
                 className="mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl border border-danger/50 bg-danger-soft text-sm font-medium text-danger transition-colors hover:bg-danger/25"

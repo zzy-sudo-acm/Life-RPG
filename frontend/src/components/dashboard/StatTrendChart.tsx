@@ -45,8 +45,33 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
     (_, index) => (chartMaximum / 4) * index,
   )
 
-  if (points.length === 0) {
-    return <p className="py-16 text-center text-sm text-muted">还没有属性趋势记录</p>
+  if (points.length <= 1) {
+    const snapshot = points[0]
+    if (!snapshot) {
+      return <p className="py-16 text-center text-sm text-muted">还没有属性趋势记录</p>
+    }
+    // 只有一笔记录时画不出曲线：改为一排属性墨点，封存首笔起点
+    return (
+      <div className="py-8">
+        <div className="flex flex-wrap items-end justify-center gap-x-7 gap-y-4">
+          {STAT_KEYS.map((key) => (
+            <div key={key} className="flex flex-col items-center gap-1.5">
+              <span
+                className="font-display text-xl font-bold tabular-nums"
+                style={{ color: STAT_COLORS[key] }}
+              >
+                {snapshot.values[key]}
+              </span>
+              <span className="size-2 rotate-45" style={{ backgroundColor: STAT_COLORS[key] }} />
+              <span className="text-xs text-muted">{STAT_LABELS[key]}</span>
+            </div>
+          ))}
+        </div>
+        <p className="mt-6 text-center font-kai text-xs text-faint">
+          首笔属性已封存入册 · 再记录一次，成长曲线便会显现
+        </p>
+      </div>
+    )
   }
 
   const baseline = yFor(0, chartMaximum)

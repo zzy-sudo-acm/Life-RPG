@@ -61,12 +61,15 @@ export function ActivityHeatmap({ events }: ActivityHeatmapProps) {
   }
 
   const levelOf = (day: DayActivity): number => {
-    if (day.exp <= 0 || maxExp <= 0) return 0
-    const ratio = day.exp / maxExp
-    if (ratio < 0.25) return 1
-    if (ratio < 0.5) return 2
-    if (ratio < 0.75) return 3
-    return 4
+    if (day.exp > 0 && maxExp > 0) {
+      const ratio = day.exp / maxExp
+      if (ratio < 0.25) return 1
+      if (ratio < 0.5) return 2
+      if (ratio < 0.75) return 3
+      return 4
+    }
+    // 有记录但没有 EXP：也留一笔淡墨，那一天不算虚度
+    return day.count > 0 ? 1 : 0
   }
 
   const activeDays = days.filter((day) => day.count > 0).length

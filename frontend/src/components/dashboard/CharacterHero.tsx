@@ -1,6 +1,6 @@
 import { Edit3, Flag, Shield } from 'lucide-react'
 import type { Character, Goal } from '../../types/models'
-import { formatNumber } from '../../utils/format'
+import { daysUntil, formatDate, formatNumber } from '../../utils/format'
 import { LevelSeal } from '../ui/LevelSeal'
 import { ProgressBar } from '../ui/ProgressBar'
 
@@ -84,6 +84,18 @@ export function CharacterHero({ character, primaryGoal, onEdit }: CharacterHeroP
               <div className="mt-2.5">
                 <ProgressBar value={primaryGoal.progress} label={`目标进度 · ${primaryGoal.progress}%`} />
               </div>
+              {(() => {
+                const daysLeft = daysUntil(primaryGoal.deadline)
+                if (daysLeft === null || primaryGoal.status === 'completed') return null
+                return (
+                  <p className="mt-1.5 text-xs text-faint">
+                    截止 {formatDate(primaryGoal.deadline)}
+                    <span className={daysLeft <= 60 ? 'ml-1.5 font-semibold text-danger' : 'ml-1.5 font-semibold text-exp'}>
+                      {daysLeft >= 0 ? `· 还剩 ${daysLeft} 天` : `· 已逾 ${-daysLeft} 天`}
+                    </span>
+                  </p>
+                )
+              })()}
             </div>
           ) : (
             <p className="mt-2 text-sm text-muted">
