@@ -1,4 +1,4 @@
-import { Pencil, Plus, Swords, Trash2 } from 'lucide-react'
+import { Pencil, Plus, Skull, Swords, Trash2, Trophy } from 'lucide-react'
 import { useState } from 'react'
 import { BossDamageEditor } from '../components/bosses/BossDamageEditor'
 import { BossEditor } from '../components/bosses/BossEditor'
@@ -10,6 +10,7 @@ import { ProgressBar } from '../components/ui/ProgressBar'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { useAppStore } from '../store/AppStoreContext'
 import type { Boss } from '../types/models'
+import { cn } from '../utils/cn'
 import { formatDate, formatNumber } from '../utils/format'
 
 export function BossesPage() {
@@ -57,8 +58,9 @@ export function BossesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Boss Battle"
         title="Boss 挑战"
-        description="将阶段性难题量化为 HP，通过完成任务或手动记录挑战逐步击破。"
+        description="把阶段性难题量化为 HP，通过完成任务或手动记录挑战逐步击破。"
         action={
           <Button icon={<Plus size={16} />} onClick={openNewBoss}>
             新建 Boss
@@ -68,70 +70,106 @@ export function BossesPage() {
 
       {bosses.length === 0 ? (
         <EmptyState
+          icon={<Skull size={22} />}
           title="暂时没有 Boss"
           description="为重要挑战设置生命值，再用现实行动逐步降低它。"
           action={<Button onClick={openNewBoss}>创建第一个 Boss</Button>}
         />
       ) : (
-        <div className="grid gap-4 lg:grid-cols-2 2xl:grid-cols-3">
+        <div className="grid items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3">
           {bosses.map((boss) => {
-            const dealtDamage = boss.maxHp - boss.currentHp
+            const defeated = boss.status === 'defeated' || boss.currentHp === 0
             return (
-              <Panel key={boss.id} className="flex flex-col p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <div className="min-w-0">
+              <Panel
+                key={boss.id}
+                className={cn(
+                  'relative flex flex-col overflow-hidden p-5',
+                  defeated ? 'border-exp/35' : 'border-danger/25',
+                )}
+              >
+                {/* 氛围光：未击败为暗红，已击败为金色 */}
+                <span
+                  aria-hidden
+                  className={cn(
+                    'pointer-events-none absolute -top-16 left-1/2 h-32 w-56 -translate-x-1/2 rounded-full blur-3xl',
+                    defeated ? 'bg-exp/15' : 'bg-danger/15',
+                  )}
+                />
+                {defeated ? (
+                  <span
+                    aria-hidden
+                    className="pointer-events-none absolute right-4 top-4 flex rotate-12 items-center gap-1 rounded-lg border-2 border-exp/60 px-2 py-1 text-xs font-black tracking-widest text-exp/90"
+                  >
+                    <Trophy size={12} /> 已讨伐
+                  </span>
+                ) : null}
+
+                <div className="relative flex items-start gap-3">
+                  <span
+                    className={cn(
+                      'flex size-12 shrink-0 items-center justify-center rounded-2xl border',
+                      defeated
+                        ? 'border-exp/40 bg-exp-soft text-exp'
+                        : 'border-danger/40 bg-danger-soft text-danger',
+                    )}
+                  >
+                    <Skull size={24} />
+                  </span>
+                  <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                       <h2 className="text-lg font-semibold text-ink">{boss.name}</h2>
                       <StatusBadge value={boss.status} />
                     </div>
-                    <p className="mt-1 text-xs text-muted">
+                    <p className="mt-1 text-xs text-faint">
                       {boss.goalId === null
                         ? '未关联目标'
                         : `目标：${goalNames.get(boss.goalId) ?? '未知目标'}`}
+                      {' · '}截止：{formatDate(boss.deadline)}
                     </p>
-                  </div>
-                  <div className="flex shrink-0 gap-1">
-                    <Button
-                      variant="ghost"
-                      className="px-2"
-                      aria-label={`编辑 Boss：${boss.name}`}
-                      onClick={() => openBoss(boss)}
-                    >
-                      <Pencil size={15} />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      className="px-2 text-danger"
-                      aria-label={`删除 Boss：${boss.name}`}
-                      onClick={() => void handleDelete(boss).catch(() => undefined)}
-                    >
-                      <Trash2 size={15} />
-                    </Button>
                   </div>
                 </div>
 
                 {boss.description ? (
-                  <p className="mt-4 flex-1 text-sm text-muted">{boss.description}</p>
+                  <p className="relative mt-3 flex-1 text-sm leading-6 text-muted">{boss.description}</p>
                 ) : (
                   <div className="flex-1" />
                 )}
 
-                <div className="mt-5">
+                <div className="relative mt-4">
                   <ProgressBar
-                    value={dealtDamage}
+                    value={boss.currentHp}
                     max={boss.maxHp}
-                    tone={boss.currentHp === 0 ? 'primary' : 'danger'}
-                    label={`剩余 HP ${formatNumber(boss.currentHp)} / ${formatNumber(boss.maxHp)}`}
+                    tone={defeated ? 'exp' : 'danger'}
+                    size="lg"
+                    label={`HP ${formatNumber(boss.currentHp)} / ${formatNumber(boss.maxHp)}`}
                   />
                 </div>
-                <div className="mt-4 flex items-center justify-between gap-3 border-t border-line pt-4">
-                  <p className="text-xs text-muted">截止：{formatDate(boss.deadline)}</p>
+
+                <div className="relative mt-4 flex items-center gap-2 border-t border-line/60 pt-4">
                   <Button
+                    className="flex-1"
+                    variant={defeated ? 'secondary' : 'dangerSolid'}
                     icon={<Swords size={15} />}
-                    disabled={boss.currentHp === 0 || boss.status === 'defeated'}
+                    disabled={defeated}
                     onClick={() => setDamageTarget(boss)}
                   >
-                    记录伤害
+                    {defeated ? '已击破' : '记录伤害'}
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="min-h-9 px-2"
+                    aria-label={`编辑 Boss：${boss.name}`}
+                    onClick={() => openBoss(boss)}
+                  >
+                    <Pencil size={15} />
+                  </Button>
+                  <Button
+                    variant="ghost"
+                    className="min-h-9 px-2 text-danger hover:bg-danger-soft hover:text-danger"
+                    aria-label={`删除 Boss：${boss.name}`}
+                    onClick={() => void handleDelete(boss).catch(() => undefined)}
+                  >
+                    <Trash2 size={15} />
                   </Button>
                 </div>
               </Panel>

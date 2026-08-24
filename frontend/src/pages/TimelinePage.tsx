@@ -33,6 +33,7 @@ export function TimelinePage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Life Map"
         title="人生地图"
         description="用父子阶段组织人生路线，顺序、日期和状态都可随成长调整。"
         action={
@@ -42,7 +43,7 @@ export function TimelinePage() {
         }
       />
 
-      {error ? <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-danger">{error}</p> : null}
+      {error ? <p role="alert" className="rounded-xl border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger">{error}</p> : null}
 
       {data.timeline.length === 0 ? (
         <EmptyState

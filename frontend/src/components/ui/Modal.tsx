@@ -33,7 +33,7 @@ export function Modal({
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-black/35 p-0 sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex items-end justify-center bg-black/65 p-0 backdrop-blur-sm sm:items-center sm:p-6"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !closeDisabled) onClose()
@@ -43,9 +43,9 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
-        className={`max-h-[92vh] w-full overflow-y-auto rounded-t-2xl bg-white shadow-xl sm:rounded-2xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
+        className={`max-h-[92vh] w-full animate-pop-in overflow-y-auto rounded-t-2xl border border-line bg-surface shadow-[0_24px_80px_rgb(0_0_0/0.55)] sm:rounded-2xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
       >
-        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-white px-5 py-4">
+        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-surface/95 px-5 py-4 backdrop-blur">
           <div>
             <h2 id="dialog-title" className="text-lg font-semibold text-ink">
               {title}
@@ -56,7 +56,7 @@ export function Modal({
             type="button"
             aria-label="关闭"
             disabled={closeDisabled}
-            className="rounded-lg p-1.5 text-muted hover:bg-primary-soft hover:text-primary"
+            className="rounded-lg p-1.5 text-muted transition-colors hover:bg-white/8 hover:text-ink disabled:opacity-40"
             onClick={onClose}
           >
             <X size={18} />

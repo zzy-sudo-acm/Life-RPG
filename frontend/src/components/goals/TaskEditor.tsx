@@ -197,7 +197,7 @@ export function TaskEditor({
           </FormField>
           <FormField label="状态" htmlFor="task-status">
             {task?.status === 'completed' ? (
-              <div className="rounded-[10px] border border-line bg-[#f1f3f1] px-3 py-2 text-sm text-muted">
+              <div className="rounded-xl border border-line bg-white/5 px-3 py-2 text-sm text-muted">
                 已完成（奖励已结算，不能退回）
               </div>
             ) : (

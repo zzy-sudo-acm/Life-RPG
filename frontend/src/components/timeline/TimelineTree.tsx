@@ -1,5 +1,6 @@
-import { CalendarRange, Pencil, Trash2 } from 'lucide-react'
+import { CalendarRange, Check, Circle, MapPin, Pencil, Trash2 } from 'lucide-react'
 import type { TimelineNode } from '../../types/models'
+import { cn } from '../../utils/cn'
 import { formatDate } from '../../utils/format'
 import { Button } from '../ui/Button'
 import { Panel } from '../ui/Panel'
@@ -55,40 +56,91 @@ function flattenNodes(nodes: TimelineNode[]): FlatNode[] {
   return result
 }
 
+/** 阶段节点标记：已完成=翡翠勾，当前=脉动信标，未来=空心暗点。 */
+function NodeMarker({ status }: { status: TimelineNode['status'] }) {
+  if (status === 'past') {
+    return (
+      <span className="flex size-9 items-center justify-center rounded-full border border-primary/50 bg-primary-soft text-primary shadow-[0_0_14px_rgb(62_207_142/0.3)]">
+        <Check size={16} strokeWidth={3} />
+      </span>
+    )
+  }
+  if (status === 'current') {
+    return (
+      <span className="relative flex size-9 items-center justify-center rounded-full border border-exp/60 bg-exp-soft text-exp">
+        <span
+          aria-hidden
+          className="absolute inset-0 animate-pulse-ring rounded-full border border-exp/70"
+        />
+        <MapPin size={16} />
+      </span>
+    )
+  }
+  return (
+    <span className="flex size-9 items-center justify-center rounded-full border border-line bg-canvas/70 text-faint">
+      <Circle size={13} />
+    </span>
+  )
+}
+
 export function TimelineTree({ nodes, onEdit, onDelete }: TimelineTreeProps) {
   const flatNodes = flattenNodes(nodes)
 
   return (
-    <ol className="space-y-3">
+    <ol className="relative space-y-4 before:absolute before:bottom-6 before:left-[17px] before:top-6 before:w-px before:bg-gradient-to-b before:from-primary/50 before:via-line before:to-line/40">
       {flatNodes.map(({ node, depth, parentName }) => (
-        <li key={node.id} style={{ marginLeft: `${Math.min(depth, 4) * 20}px` }}>
-          <Panel className={`relative p-4 sm:p-5 ${depth > 0 ? 'border-l-4 border-l-primary/35' : ''}`}>
-            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+        <li
+          key={node.id}
+          className="relative"
+          style={{ paddingLeft: `${44 + Math.min(depth, 4) * 18}px` }}
+        >
+          {/* 深度缩进时保持主路上的标记对齐 */}
+          <span className="absolute left-0 top-4" style={{ left: `${Math.min(depth, 4) * 18}px` }}>
+            <NodeMarker status={node.status} />
+          </span>
+
+          <Panel
+            className={cn(
+              'p-4 sm:p-5',
+              node.status === 'current' && 'border-exp/35 shadow-[0_0_30px_rgb(242_178_62/0.08)]',
+            )}
+          >
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
                   <h2 className="font-semibold text-ink">{node.title}</h2>
                   <StatusBadge value={node.status} />
-                  <span className="rounded-md bg-[#f0f2f0] px-2 py-1 text-xs text-muted">
+                  <span className="rounded-full border border-line bg-white/5 px-2 py-0.5 text-xs text-muted">
                     {node.stageType || '未分类阶段'}
                   </span>
                 </div>
                 {parentName ? (
                   <p className="mt-2 text-xs font-medium text-primary">承接自：{parentName}</p>
                 ) : null}
-                <p className="mt-2 whitespace-pre-wrap text-sm text-muted">
+                <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted">
                   {node.description || '暂无描述'}
                 </p>
-                <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-muted">
+                <p className="mt-3 flex flex-wrap items-center gap-1.5 text-xs text-faint">
                   <CalendarRange size={14} />
                   {formatDate(node.startDate)} — {formatDate(node.endDate)}
                   <span>· 顺序 {node.order}</span>
                 </p>
               </div>
-              <div className="flex shrink-0 gap-2 self-end sm:self-start">
-                <Button variant="ghost" icon={<Pencil size={15} />} onClick={() => onEdit(node)}>
+              <div className="flex shrink-0 gap-1 self-end sm:self-start">
+                <Button
+                  variant="ghost"
+                  className="min-h-9 px-2.5 text-xs"
+                  icon={<Pencil size={13} />}
+                  onClick={() => onEdit(node)}
+                >
                   编辑
                 </Button>
-                <Button variant="ghost" icon={<Trash2 size={15} />} onClick={() => onDelete(node)}>
+                <Button
+                  variant="ghost"
+                  className="min-h-9 px-2.5 text-xs text-danger hover:bg-danger-soft hover:text-danger"
+                  icon={<Trash2 size={13} />}
+                  onClick={() => onDelete(node)}
+                >
                   删除
                 </Button>
               </div>

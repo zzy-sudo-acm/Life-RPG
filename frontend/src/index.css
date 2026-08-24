@@ -1,18 +1,119 @@
 @import "tailwindcss";
 
 @theme {
-  --color-canvas: #f6f7f4;
-  --color-surface: #ffffff;
-  --color-sidebar: #101a1d;
-  --color-ink: #17201d;
-  --color-muted: #66736e;
-  --color-line: #dfe5e1;
-  --color-primary: #176b4d;
-  --color-primary-soft: #e9f3ee;
-  --color-exp: #d9850b;
-  --color-danger: #c94b43;
+  /* ── 星夜面板 · 基础色板 ───────────────────────────── */
+  --color-canvas: #090d16;
+  --color-surface: #121829;
+  --color-raised: #1a2338;
+  --color-sidebar: #0b101d;
+  --color-ink: #eef1f8;
+  --color-muted: #98a1b6;
+  --color-faint: #68718a;
+  --color-line: #263048;
+  --color-primary: #3ecf8e;
+  --color-primary-deep: #23a06b;
+  --color-primary-soft: rgb(62 207 142 / 0.12);
+  --color-exp: #f2b23e;
+  --color-exp-soft: rgb(242 178 62 / 0.13);
+  --color-danger: #e35d6a;
+  --color-danger-soft: rgb(227 93 106 / 0.12);
+  --color-info: #4cc2ff;
+  --color-info-soft: rgb(76 194 255 / 0.12);
+
+  /* ── 五维属性 ─────────────────────────────────────── */
+  --color-stat-technical: #4cc2ff;
+  --color-stat-intelligence: #9b8cf8;
+  --color-stat-creativity: #f472b6;
+  --color-stat-execution: #f2b23e;
+  --color-stat-health: #3ecf8e;
+
+  /* ── 装备品质 ─────────────────────────────────────── */
+  --color-quality-common: #9aa4b2;
+  --color-quality-fine: #3ecf8e;
+  --color-quality-rare: #4cc2ff;
+  --color-quality-epic: #b07cf6;
+  --color-quality-legendary: #f2b23e;
+
   --font-sans: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+  --font-display: "Inter", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
+
+  /* ── 动效 ─────────────────────────────────────────── */
+  --animate-fade-up: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pop-in: pop-in 0.4s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+  --animate-float-up: float-up 1.6s ease-out both;
+  --animate-shine: shine 2.8s linear infinite;
+  --animate-pulse-ring: pulse-ring 2.4s ease-out infinite;
+  --animate-glow: glow 3.2s ease-in-out infinite;
+  --animate-spin-slow: spin 14s linear infinite;
 }
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: scale(0.86) translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes float-up {
+  0% {
+    opacity: 0;
+    transform: translateY(6px) scale(0.9);
+  }
+  18% {
+    opacity: 1;
+    transform: translateY(0) scale(1.05);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-46px) scale(1);
+  }
+}
+
+@keyframes shine {
+  from {
+    transform: translateX(-120%) skewX(-18deg);
+  }
+  to {
+    transform: translateX(240%) skewX(-18deg);
+  }
+}
+
+@keyframes pulse-ring {
+  0% {
+    opacity: 0.7;
+    transform: scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.9);
+  }
+}
+
+@keyframes glow {
+  0%,
+  100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 :root {
   font-family: var(--font-sans);
   color: var(--color-ink);
@@ -29,13 +130,19 @@
 html {
   min-width: 320px;
   background: var(--color-canvas);
+  color-scheme: dark;
 }
 
 body {
   min-width: 320px;
   min-height: 100vh;
   margin: 0;
-  background: var(--color-canvas);
+  background:
+    radial-gradient(120% 60% at 85% -10%, rgb(76 194 255 / 0.07), transparent 60%),
+    radial-gradient(110% 55% at 8% -8%, rgb(62 207 142 / 0.09), transparent 62%),
+    radial-gradient(90% 50% at 50% 115%, rgb(155 140 248 / 0.06), transparent 65%),
+    var(--color-canvas);
+  background-attachment: fixed;
 }
 
 button,
@@ -61,8 +168,41 @@ input[type='checkbox']:not(:disabled) {
 }
 
 ::selection {
-  color: white;
+  color: #081019;
   background: var(--color-primary);
+}
+
+/* 细滚动条，融入暗色面板 */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #2c3852 transparent;
+}
+*::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+*::-webkit-scrollbar-thumb {
+  border-radius: 8px;
+  background: #2c3852;
+}
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+/* 数字输入框去掉原生步进器，保持游戏面板观感 */
+input[type='number']::-webkit-outer-spin-button,
+input[type='number']::-webkit-inner-spin-button {
+  margin: 0;
+  -webkit-appearance: none;
+}
+input[type='number'] {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
+
+/* 页面切换时的入场动画（AppShell 通过 key 重新挂载 main） */
+.page-enter {
+  animation: var(--animate-fade-up);
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,4 +1,4 @@
-import { CalendarDays, Pencil, Plus, Trash2 } from 'lucide-react'
+import { CheckCircle2, PenLine, Plus, ScrollText, Swords, Trash2, Trophy } from 'lucide-react'
 import { useState } from 'react'
 import { EventEditor } from '../components/events/EventEditor'
 import { RewardSummary } from '../components/events/RewardSummary'
@@ -10,11 +10,14 @@ import { useAppStore } from '../store/AppStoreContext'
 import type { LifeEvent } from '../types/models'
 import { formatDate } from '../utils/format'
 
-const SOURCE_LABELS: Record<LifeEvent['sourceType'], string> = {
-  manual: '手动记录',
-  task: '任务自动记录',
-  achievement: '成就自动记录',
-  boss: 'Boss 自动记录',
+const SOURCE_META: Record<
+  LifeEvent['sourceType'],
+  { label: string; icon: typeof PenLine; color: string }
+> = {
+  manual: { label: '手动记录', icon: PenLine, color: '#98a1b6' },
+  task: { label: '任务达成', icon: CheckCircle2, color: '#3ecf8e' },
+  achievement: { label: '成就解锁', icon: Trophy, color: '#f2b23e' },
+  boss: { label: 'Boss 讨伐', icon: Swords, color: '#e35d6a' },
 }
 
 export function EventsPage() {
@@ -43,63 +46,92 @@ export function EventsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Adventure Log"
         title="人生日志"
-        description="按时间记录重要经历；任务和 Boss 结算产生的事件会标明自动来源。"
+        description="每一次成长都值得留痕；任务、成就和 Boss 结算会自动写入日志。"
         action={
           <Button icon={<Plus size={16} />} onClick={() => setEditor('new')}>
-            添加事件
+            记录事件
           </Button>
         }
       />
 
-      {error ? <p role="alert" className="rounded-xl bg-red-50 px-4 py-3 text-sm text-danger">{error}</p> : null}
+      {error ? <p role="alert" className="rounded-xl border border-danger/30 bg-danger-soft px-4 py-3 text-sm text-danger">{error}</p> : null}
 
       {sortedEvents.length === 0 ? (
         <EmptyState
+          icon={<ScrollText size={22} />}
           title="还没有人生事件"
           description="完成项目、比赛获奖或一个学习阶段，都值得留下记录。"
-          action={<Button onClick={() => setEditor('new')}>添加第一条事件</Button>}
+          action={<Button onClick={() => setEditor('new')}>记录第一条事件</Button>}
         />
       ) : (
-        <ol className="space-y-4">
-          {sortedEvents.map((lifeEvent) => (
-            <li key={lifeEvent.id}>
-              <Panel className="p-5">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                  <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="font-semibold text-ink">{lifeEvent.title}</h2>
-                      <span className={`rounded-md px-2 py-1 text-xs font-medium ${
-                        lifeEvent.sourceType === 'manual'
-                          ? 'bg-[#f0f2f0] text-muted'
-                          : 'bg-primary-soft text-primary'
-                      }`}>
-                        {SOURCE_LABELS[lifeEvent.sourceType]}
-                      </span>
+        <ol className="relative space-y-4 before:absolute before:bottom-4 before:left-[15px] before:top-4 before:w-px before:bg-gradient-to-b before:from-primary/50 before:via-line before:to-transparent">
+          {sortedEvents.map((lifeEvent) => {
+            const meta = SOURCE_META[lifeEvent.sourceType]
+            const SourceIcon = meta.icon
+            return (
+              <li key={lifeEvent.id} className="relative pl-11 sm:pl-14">
+                {/* 时间线节点 */}
+                <span
+                  className="absolute left-0 top-4 flex size-8 items-center justify-center rounded-full border bg-surface"
+                  style={{
+                    borderColor: `${meta.color}55`,
+                    boxShadow: `0 0 12px ${meta.color}33`,
+                  }}
+                >
+                  <SourceIcon size={14} style={{ color: meta.color }} />
+                </span>
+
+                <Panel className="p-4 sm:p-5">
+                  <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+                    <div className="min-w-0 flex-1">
+                      <div className="flex flex-wrap items-center gap-2">
+                        <time className="rounded-md border border-line bg-canvas/60 px-2 py-0.5 text-xs font-medium tabular-nums text-muted">
+                          {formatDate(lifeEvent.date)}
+                        </time>
+                        <span
+                          className="rounded-full border px-2 py-0.5 text-[11px] font-medium"
+                          style={{
+                            borderColor: `${meta.color}44`,
+                            backgroundColor: `${meta.color}12`,
+                            color: meta.color,
+                          }}
+                        >
+                          {meta.label}
+                        </span>
+                      </div>
+                      <h2 className="mt-2 font-semibold text-ink">{lifeEvent.title}</h2>
+                      <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted">
+                        {lifeEvent.description || '暂无描述'}
+                      </p>
+                      <div className="mt-3">
+                        <RewardSummary rewards={lifeEvent.rewards} skills={data.skills} bosses={data.bosses} />
+                      </div>
                     </div>
-                    <p className="mt-2 flex items-center gap-1.5 text-xs text-muted">
-                      <CalendarDays size={14} /> {formatDate(lifeEvent.date)}
-                      {lifeEvent.sourceId ? ` · 来源 ID：${lifeEvent.sourceId}` : ''}
-                    </p>
-                    <p className="mt-3 whitespace-pre-wrap text-sm text-muted">
-                      {lifeEvent.description || '暂无描述'}
-                    </p>
-                    <div className="mt-4">
-                      <RewardSummary rewards={lifeEvent.rewards} skills={data.skills} bosses={data.bosses} />
+                    <div className="flex shrink-0 gap-1 self-end sm:self-start">
+                      <Button
+                        variant="ghost"
+                        className="min-h-9 px-2"
+                        aria-label={`编辑事件：${lifeEvent.title}`}
+                        onClick={() => setEditor(lifeEvent)}
+                      >
+                        <PenLine size={15} />
+                      </Button>
+                      <Button
+                        variant="ghost"
+                        className="min-h-9 px-2 text-danger hover:bg-danger-soft hover:text-danger"
+                        aria-label={`删除事件：${lifeEvent.title}`}
+                        onClick={() => handleDelete(lifeEvent)}
+                      >
+                        <Trash2 size={15} />
+                      </Button>
                     </div>
                   </div>
-                  <div className="flex shrink-0 gap-2 self-end sm:self-start">
-                    <Button variant="ghost" icon={<Pencil size={15} />} onClick={() => setEditor(lifeEvent)}>
-                      编辑
-                    </Button>
-                    <Button variant="ghost" icon={<Trash2 size={15} />} onClick={() => handleDelete(lifeEvent)}>
-                      删除
-                    </Button>
-                  </div>
-                </div>
-              </Panel>
-            </li>
-          ))}
+                </Panel>
+              </li>
+            )
+          })}
         </ol>
       )}
 

@@ -21,15 +21,26 @@ interface StatusBadgeProps {
 export function StatusBadge({ value }: StatusBadgeProps) {
   const positive = value === 'completed' || value === 'defeated' || value === 'past'
   const active = value === 'active' || value === 'in_progress' || value === 'current'
+  const golden = value === 'automatic'
   return (
     <span
       className={cn(
-        'inline-flex rounded-md px-2 py-1 text-xs font-medium',
-        positive && 'bg-primary-soft text-primary',
-        active && 'bg-[#e8f0fb] text-[#2b65a5]',
-        !positive && !active && 'bg-[#f0f2f0] text-muted',
+        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
+        positive && 'border-primary/35 bg-primary-soft text-primary',
+        active && 'border-info/35 bg-info-soft text-info',
+        golden && 'border-exp/35 bg-exp-soft text-exp',
+        !positive && !active && !golden && 'border-line bg-white/5 text-muted',
       )}
     >
+      <span
+        className={cn(
+          'size-1.5 rounded-full',
+          positive && 'bg-primary',
+          active && 'bg-info',
+          golden && 'bg-exp',
+          !positive && !active && !golden && 'bg-faint',
+        )}
+      />
       {labels[value] ?? value}
     </span>
   )

@@ -9,21 +9,33 @@ import { Panel } from '../components/ui/Panel'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { useAppStore } from '../store/AppStoreContext'
 import type { Skill, SkillCategory } from '../types/models'
+import { cn } from '../utils/cn'
 
-interface SkillRow {
-  skill: Skill
-  depth: number
+/** 技能段位：纯展示层映射，按等级划分成长阶段。 */
+interface SkillTier {
+  label: string
+  color: string
 }
 
-function flattenSkills(skills: Skill[]): SkillRow[] {
+function skillTier(skill: Skill): SkillTier {
+  if (skill.level >= 20) return { label: '大师', color: '#f2b23e' }
+  if (skill.level >= 10) return { label: '精通', color: '#b07cf6' }
+  if (skill.level >= 5) return { label: '熟练', color: '#4cc2ff' }
+  return { label: '入门', color: '#3ecf8e' }
+}
+
+/** 尚未投入任何经验的技能显示为「未点亮」状态。 */
+function isUntouched(skill: Skill): boolean {
+  return skill.level <= 1 && skill.exp === 0
+}
+
+function buildChildrenMap(skills: Skill[]): Map<string | null, Skill[]> {
   const skillIds = new Set(skills.map((skill) => skill.id))
   const children = new Map<string | null, Skill[]>()
 
   for (const skill of skills) {
     const parentId =
-      skill.parentId !== null && skillIds.has(skill.parentId)
-        ? skill.parentId
-        : null
+      skill.parentId !== null && skillIds.has(skill.parentId) ? skill.parentId : null
     const siblings = children.get(parentId) ?? []
     siblings.push(skill)
     children.set(parentId, siblings)
@@ -37,24 +49,101 @@ function flattenSkills(skills: Skill[]): SkillRow[] {
     )
   }
 
-  const rows: SkillRow[] = []
-  const visited = new Set<string>()
-  const visit = (skill: Skill, depth: number) => {
-    if (visited.has(skill.id)) return
-    visited.add(skill.id)
-    rows.push({ skill, depth })
-    for (const child of children.get(skill.id) ?? []) {
-      visit(child, depth + 1)
-    }
-  }
+  return children
+}
 
-  for (const root of children.get(null) ?? []) {
-    visit(root, 0)
-  }
-  for (const skill of skills) {
-    visit(skill, 0)
-  }
-  return rows
+interface SkillBranchProps {
+  skill: Skill
+  childrenMap: Map<string | null, Skill[]>
+  onEdit: (skill: Skill) => void
+  onDelete: (skill: Skill) => void
+}
+
+function SkillBranch({ skill, childrenMap, onEdit, onDelete }: SkillBranchProps) {
+  const tier = skillTier(skill)
+  const untouched = isUntouched(skill)
+  const children = childrenMap.get(skill.id) ?? []
+
+  return (
+    <div>
+      <div
+        className={cn(
+          'group flex items-center gap-3 rounded-2xl border border-transparent px-2 py-3 transition-colors hover:border-line hover:bg-white/3 sm:px-3',
+          untouched && 'opacity-55',
+        )}
+      >
+        {/* 技能徽记：外圈颜色代表段位 */}
+        <span
+          className="flex size-11 shrink-0 flex-col items-center justify-center rounded-xl border bg-canvas/60 font-black leading-none"
+          style={{ borderColor: `${tier.color}66`, color: tier.color }}
+        >
+          <span className="text-[9px] font-medium opacity-70">Lv</span>
+          <span className="text-sm tabular-nums">{skill.level}</span>
+        </span>
+
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <h3 className="font-medium text-ink">{skill.name}</h3>
+            <span
+              className="rounded-full border px-2 py-0.5 text-[10px] font-semibold"
+              style={{
+                borderColor: `${tier.color}55`,
+                backgroundColor: `${tier.color}14`,
+                color: tier.color,
+              }}
+            >
+              {untouched ? '未点亮' : tier.label}
+            </span>
+          </div>
+          {skill.description ? (
+            <p className="mt-1 line-clamp-2 text-xs leading-5 text-muted">{skill.description}</p>
+          ) : null}
+          <ProgressBar
+            className="mt-2 max-w-md"
+            value={skill.exp}
+            max={skill.expToNextLevel}
+            tone="exp"
+            size="sm"
+            label={`经验 ${skill.exp} / ${skill.expToNextLevel}`}
+          />
+        </div>
+
+        <div className="flex shrink-0 gap-1">
+          <Button
+            variant="ghost"
+            className="min-h-9 px-2"
+            aria-label={`编辑技能：${skill.name}`}
+            onClick={() => onEdit(skill)}
+          >
+            <Pencil size={15} />
+          </Button>
+          <Button
+            variant="ghost"
+            className="min-h-9 px-2 text-danger hover:bg-danger-soft hover:text-danger"
+            aria-label={`删除技能：${skill.name}`}
+            onClick={() => onDelete(skill)}
+          >
+            <Trash2 size={15} />
+          </Button>
+        </div>
+      </div>
+
+      {/* 子技能：用左侧竖线表达成长路径 */}
+      {children.length > 0 ? (
+        <div className="ml-5 space-y-1 border-l border-line/70 pl-3 sm:ml-7 sm:pl-4">
+          {children.map((child) => (
+            <SkillBranch
+              key={child.id}
+              skill={child}
+              childrenMap={childrenMap}
+              onEdit={onEdit}
+              onDelete={onDelete}
+            />
+          ))}
+        </div>
+      ) : null}
+    </div>
+  )
 }
 
 export function SkillsPage() {
@@ -70,7 +159,6 @@ export function SkillsPage() {
   const categories = data.skillCategories.toSorted(
     (left, right) => left.order - right.order || left.name.localeCompare(right.name),
   )
-  const skillNames = new Map(data.skills.map((skill) => [skill.id, skill.name]))
 
   const openNewCategory = () => {
     setEditingCategory(null)
@@ -116,8 +204,9 @@ export function SkillsPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Skill Tree"
         title="技能树"
-        description="按分类维护可升级技能，并用父子关系表达学习路径。"
+        description="按分类维护可升级技能，父子关系表达学习路径，等级点亮段位。"
         action={
           <div className="flex flex-wrap gap-2">
             <Button
@@ -140,6 +229,7 @@ export function SkillsPage() {
 
       {categories.length === 0 ? (
         <EmptyState
+          icon={<GitBranch size={22} />}
           title="还没有技能分类"
           description="先创建一个分类，再添加具体技能。"
           action={<Button onClick={openNewCategory}>创建分类</Button>}
@@ -150,16 +240,19 @@ export function SkillsPage() {
             const categorySkills = data.skills.filter(
               (skill) => skill.categoryId === category.id,
             )
-            const skillRows = flattenSkills(categorySkills)
+            const childrenMap = buildChildrenMap(categorySkills)
+            const roots = childrenMap.get(null) ?? []
+            const totalLevels = categorySkills.reduce((sum, skill) => sum + skill.level, 0)
+
             return (
               <Panel key={category.id} className="overflow-hidden">
-                <header className="flex flex-col gap-3 border-b border-line px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5">
+                <header className="flex flex-col gap-3 border-b border-line/80 px-4 py-4 sm:flex-row sm:items-start sm:justify-between sm:px-5">
                   <div className="min-w-0">
-                    <div className="flex items-center gap-2">
+                    <div className="flex flex-wrap items-center gap-2">
                       <GitBranch size={17} className="shrink-0 text-primary" />
                       <h2 className="font-semibold text-ink">{category.name}</h2>
-                      <span className="text-xs text-muted">
-                        {categorySkills.length} 项
+                      <span className="rounded-full border border-line bg-white/5 px-2 py-0.5 text-xs text-muted">
+                        {categorySkills.length} 项 · 总 Lv.{totalLevels}
                       </span>
                     </div>
                     {category.description ? (
@@ -176,7 +269,7 @@ export function SkillsPage() {
                     </Button>
                     <Button
                       variant="ghost"
-                      className="px-2"
+                      className="min-h-9 px-2"
                       aria-label={`编辑分类：${category.name}`}
                       onClick={() => openCategory(category)}
                     >
@@ -184,7 +277,7 @@ export function SkillsPage() {
                     </Button>
                     <Button
                       variant="ghost"
-                      className="px-2 text-danger"
+                      className="min-h-9 px-2 text-danger hover:bg-danger-soft hover:text-danger"
                       aria-label={`删除分类：${category.name}`}
                       onClick={() =>
                         void handleDeleteCategory(category).catch(() => undefined)
@@ -195,7 +288,7 @@ export function SkillsPage() {
                   </div>
                 </header>
 
-                {skillRows.length === 0 ? (
+                {roots.length === 0 ? (
                   <div className="p-4 sm:p-5">
                     <EmptyState
                       title="这个分类还没有技能"
@@ -208,62 +301,15 @@ export function SkillsPage() {
                     />
                   </div>
                 ) : (
-                  <div className="divide-y divide-line">
-                    {skillRows.map(({ skill, depth }) => (
-                      <article
+                  <div className="space-y-1 p-3 sm:p-4">
+                    {roots.map((skill) => (
+                      <SkillBranch
                         key={skill.id}
-                        className="px-4 py-4 sm:px-5"
-                        style={{ paddingLeft: `${20 + Math.min(depth, 4) * 18}px` }}
-                      >
-                        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-                          <div className="min-w-0 flex-1">
-                            <div className="flex flex-wrap items-baseline gap-2">
-                              <h3 className="font-medium text-ink">{skill.name}</h3>
-                              <span className="font-semibold text-primary">
-                                Lv.{skill.level}
-                              </span>
-                              {skill.parentId !== null ? (
-                                <span className="text-xs text-muted">
-                                  上级：{skillNames.get(skill.parentId) ?? '未知技能'}
-                                </span>
-                              ) : null}
-                            </div>
-                            {skill.description ? (
-                              <p className="mt-1 text-sm text-muted">
-                                {skill.description}
-                              </p>
-                            ) : null}
-                            <div className="mt-3 max-w-xl">
-                              <ProgressBar
-                                value={skill.exp}
-                                max={skill.expToNextLevel}
-                                tone="exp"
-                                label={`经验 ${skill.exp} / ${skill.expToNextLevel}`}
-                              />
-                            </div>
-                          </div>
-                          <div className="flex shrink-0 gap-1">
-                            <Button
-                              variant="ghost"
-                              className="px-2"
-                              aria-label={`编辑技能：${skill.name}`}
-                              onClick={() => openSkill(skill)}
-                            >
-                              <Pencil size={15} />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              className="px-2 text-danger"
-                              aria-label={`删除技能：${skill.name}`}
-                              onClick={() =>
-                                void handleDeleteSkill(skill).catch(() => undefined)
-                              }
-                            >
-                              <Trash2 size={15} />
-                            </Button>
-                          </div>
-                        </div>
-                      </article>
+                        skill={skill}
+                        childrenMap={childrenMap}
+                        onEdit={openSkill}
+                        onDelete={(target) => void handleDeleteSkill(target).catch(() => undefined)}
+                      />
                     ))}
                   </div>
                 )}

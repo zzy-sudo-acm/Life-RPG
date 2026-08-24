@@ -1,18 +1,11 @@
 import type { StatKey, StatSnapshot } from '../../types/models'
 import { STAT_KEYS, STAT_LABELS } from '../../types/models'
 import { clamp } from '../../utils/format'
+import { STAT_COLORS } from './statPalette'
 
 const WIDTH = 680
 const HEIGHT = 260
 const PADDING = { top: 20, right: 18, bottom: 42, left: 42 }
-
-const colors: Record<StatKey, string> = {
-  technical: '#176b4d',
-  intelligence: '#2f6fbd',
-  creativity: '#7657c8',
-  execution: '#d9850b',
-  health: '#c94b43',
-}
 
 function xFor(index: number, count: number): number {
   if (count <= 1) return PADDING.left
@@ -55,9 +48,12 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
   return (
     <div>
       <div className="mb-4 flex flex-wrap gap-x-4 gap-y-2 text-xs text-muted">
-        {STAT_KEYS.map((key) => (
+        {STAT_KEYS.map((key: StatKey) => (
           <span key={key} className="inline-flex items-center gap-1.5">
-            <span className="size-2 rounded-full" style={{ backgroundColor: colors[key] }} />
+            <span
+              className="size-2 rounded-full shadow-[0_0_6px_currentColor]"
+              style={{ backgroundColor: STAT_COLORS[key], color: STAT_COLORS[key] }}
+            />
             {STAT_LABELS[key]}
           </span>
         ))}
@@ -65,7 +61,7 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
       <div className="overflow-x-auto">
         <svg
           viewBox={`0 0 ${WIDTH} ${HEIGHT}`}
-          className="min-w-[560px]"
+          className="min-w-[440px]"
           role="img"
           aria-label="五维属性随时间变化折线图"
         >
@@ -78,10 +74,10 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
                   x2={WIDTH - PADDING.right}
                   y1={y}
                   y2={y}
-                  stroke="#e3e8e4"
+                  stroke="#232b3d"
                   strokeWidth="1"
                 />
-                <text x={PADDING.left - 10} y={y + 4} textAnchor="end" fontSize="11" fill="#78837e">
+                <text x={PADDING.left - 10} y={y + 4} textAnchor="end" fontSize="11" fill="#68718a">
                   {value}
                 </text>
               </g>
@@ -95,7 +91,7 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
               y={HEIGHT - 14}
               textAnchor={index === 0 ? 'start' : index === points.length - 1 ? 'end' : 'middle'}
               fontSize="11"
-              fill="#78837e"
+              fill="#68718a"
             >
               {monthLabel(point.recordedAt)}
             </text>
@@ -114,14 +110,23 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
                   <polyline
                     points={linePoints}
                     fill="none"
-                    stroke={colors[key]}
+                    stroke={STAT_COLORS[key]}
                     strokeWidth="2"
                     strokeLinejoin="round"
                     strokeLinecap="round"
+                    style={{ filter: `drop-shadow(0 0 5px ${STAT_COLORS[key]}55)` }}
                   />
                 ) : null}
                 {coordinates.map(({ x, y, value }, index) => (
-                  <circle key={`${key}-${points[index]?.id}`} cx={x} cy={y} r="3" fill={colors[key]}>
+                  <circle
+                    key={`${key}-${points[index]?.id}`}
+                    cx={x}
+                    cy={y}
+                    r="3"
+                    fill={STAT_COLORS[key]}
+                    stroke="#090d16"
+                    strokeWidth="1.5"
+                  >
                     <title>{`${STAT_LABELS[key]}：${value}`}</title>
                   </circle>
                 ))}

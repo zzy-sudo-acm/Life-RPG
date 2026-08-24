@@ -1,26 +1,78 @@
-import { Activity, Edit3, Flag, Swords, TrendingUp, Zap } from 'lucide-react'
+import {
+  Activity,
+  ArrowDown,
+  ArrowUp,
+  Check,
+  ChevronRight,
+  Minus,
+  ScrollText,
+  Sparkles,
+  Swords,
+  TrendingUp,
+} from 'lucide-react'
 import { useMemo, useState, type FormEvent } from 'react'
+import { Link } from 'react-router-dom'
+import { CharacterHero } from '../components/dashboard/CharacterHero'
+import { StatsRadar } from '../components/dashboard/StatsRadar'
+import { STAT_COLORS } from '../components/dashboard/statPalette'
 import { StatTrendChart } from '../components/dashboard/StatTrendChart'
+import { RewardCelebration } from '../components/feedback/RewardCelebration'
+import { useRewardCelebration } from '../components/feedback/useRewardCelebration'
 import { Button } from '../components/ui/Button'
 import { FormField, inputClassName } from '../components/ui/FormField'
 import { Modal } from '../components/ui/Modal'
-import { PageHeader } from '../components/ui/PageHeader'
 import { Panel } from '../components/ui/Panel'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { useAppStore } from '../store/AppStoreContext'
-import { STAT_KEYS, STAT_LABELS, type StatKey } from '../types/models'
+import {
+  STAT_KEYS,
+  STAT_LABELS,
+  type StatKey,
+  type Task,
+} from '../types/models'
 import { formatDate, formatNumber, toNumber } from '../utils/format'
+
+function SectionLink({ to, label }: { to: string; label: string }) {
+  return (
+    <Link
+      to={to}
+      className="flex items-center gap-0.5 text-xs font-medium text-faint transition-colors hover:text-primary"
+    >
+      {label}
+      <ChevronRight size={13} />
+    </Link>
+  )
+}
 
 export function DashboardPage() {
   const { data, updateCharacter, changeStat, completeTask } = useAppStore()
   const [characterOpen, setCharacterOpen] = useState(false)
   const [statOpen, setStatOpen] = useState(false)
+  const { celebration, present, dismiss } = useRewardCelebration()
+
+  const statDeltas = useMemo(() => {
+    if (!data) return null
+    const history = data.stats.history
+    if (history.length < 2) return null
+    const ordered = history.toSorted((a, b) => a.recordedAt.localeCompare(b.recordedAt))
+    const latest = ordered[ordered.length - 1]
+    const previous = ordered[ordered.length - 2]
+    if (!latest || !previous) return null
+    const deltas = {} as Record<StatKey, number>
+    for (const key of STAT_KEYS) {
+      deltas[key] = latest.values[key] - previous.values[key]
+    }
+    return deltas
+  }, [data])
 
   if (!data) return null
 
   const primaryGoal = data.goals.find((goal) => goal.id === data.character.primaryGoalId)
-  const activeTasks = data.tasks.filter((task) => task.status !== 'completed').slice(0, 5)
+  const pendingTasks = data.tasks
+    .filter((task) => task.status !== 'completed')
+    .toSorted((left, right) => (left.dueDate ?? '9999').localeCompare(right.dueDate ?? '9999'))
+  const activeTasks = pendingTasks.slice(0, 5)
   const featuredSkills = data.skills
     .toSorted((a, b) => b.level - a.level || b.exp - a.exp)
     .slice(0, 4)
@@ -29,178 +81,229 @@ export function DashboardPage() {
     .toSorted((a, b) => b.date.localeCompare(a.date))
     .slice(0, 5)
 
+  const handleQuickComplete = async (task: Task): Promise<void> => {
+    const baseLevel = data.character.level
+    try {
+      await completeTask(task.id)
+      present({ title: task.name, rewards: task.rewards, baseLevel })
+    } catch {
+      // 写入失败时错误由全局提示展示
+    }
+  }
+
   return (
-    <div className="space-y-6">
-      <PageHeader
-        title="角色总览"
-        description="查看当前成长状态，并从今天的任务继续积累经验。"
-        action={
-          <Button variant="secondary" icon={<Edit3 size={16} />} onClick={() => setCharacterOpen(true)}>
-            编辑角色
-          </Button>
-        }
+    <div className="space-y-5">
+      <CharacterHero
+        character={data.character}
+        primaryGoal={primaryGoal}
+        onEdit={() => setCharacterOpen(true)}
       />
 
-      <section className="grid gap-5 xl:grid-cols-[1.05fr_1.4fr]">
-        <Panel className="p-5 sm:p-6">
-          <div className="flex items-start justify-between gap-4">
-            <div>
-              <p className="text-sm text-muted">{data.character.name}</p>
-              <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-                <h2 className="text-2xl font-semibold text-ink">{data.character.profession}</h2>
-                <span className="text-lg font-semibold text-primary">Lv.{data.character.level}</span>
-              </div>
-              <p className="mt-1 text-sm text-muted">{data.character.lifeStage}</p>
-            </div>
-            <div className="flex size-12 items-center justify-center rounded-xl bg-primary-soft text-primary">
-              <Zap size={24} />
-            </div>
-          </div>
-          <div className="mt-6">
-            <ProgressBar
-              value={data.character.exp}
-              max={data.character.expToNextLevel}
-              tone="exp"
-              label={`EXP ${formatNumber(data.character.exp)} / ${formatNumber(data.character.expToNextLevel)}`}
-            />
-          </div>
-          <div className="mt-6 border-t border-line pt-5">
-            <p className="flex items-center gap-2 text-xs font-medium uppercase tracking-[0.08em] text-primary">
-              <Flag size={15} /> 当前主要目标
-            </p>
-            <p className="mt-2 text-lg font-medium text-ink">{primaryGoal?.name ?? '尚未设置主要目标'}</p>
-            {primaryGoal ? (
-              <div className="mt-3">
-                <ProgressBar value={primaryGoal.progress} label={`目标进度 · ${primaryGoal.progress}%`} />
-              </div>
-            ) : null}
-          </div>
-        </Panel>
-
-        <Panel className="p-5 sm:p-6">
+      <section className="grid gap-5 lg:grid-cols-5">
+        {/* 五维属性 */}
+        <Panel className="p-5 sm:p-6 lg:col-span-2">
           <div className="flex items-center justify-between gap-4">
-            <div>
-              <h2 className="flex items-center gap-2 font-semibold text-ink">
-                <Activity size={18} className="text-primary" /> 人生属性五维
-              </h2>
-              <p className="mt-1 text-sm text-muted">每次调整都会写入趋势记录。</p>
-            </div>
-            <Button variant="ghost" onClick={() => setStatOpen(true)}>
+            <h2 className="flex items-center gap-2 font-semibold text-ink">
+              <Activity size={18} className="text-primary" /> 人生属性
+            </h2>
+            <Button variant="ghost" className="min-h-9 px-3 text-xs" onClick={() => setStatOpen(true)}>
               调整属性
             </Button>
           </div>
-          <div className="mt-5 grid gap-x-8 gap-y-4 sm:grid-cols-2">
-            {STAT_KEYS.map((key) => (
-              <div key={key}>
-                <ProgressBar value={data.stats.values[key]} label={`${STAT_LABELS[key]} · ${data.stats.values[key]}`} />
-              </div>
-            ))}
+          <div className="mt-4">
+            <StatsRadar values={data.stats.values} />
           </div>
+          <ul className="mt-4 grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-2 xl:grid-cols-3">
+            {STAT_KEYS.map((key) => {
+              const delta = statDeltas?.[key] ?? null
+              return (
+                <li
+                  key={key}
+                  className="flex items-center gap-2 rounded-xl border border-line/70 bg-canvas/40 px-3 py-2"
+                >
+                  <span
+                    className="size-2 shrink-0 rounded-full shadow-[0_0_8px_currentColor]"
+                    style={{ backgroundColor: STAT_COLORS[key], color: STAT_COLORS[key] }}
+                  />
+                  <span className="min-w-0 flex-1 truncate text-xs text-muted">
+                    {STAT_LABELS[key]}
+                  </span>
+                  <span className="text-sm font-bold tabular-nums text-ink">
+                    {data.stats.values[key]}
+                  </span>
+                  {delta !== null ? (
+                    <span
+                      className={`flex items-center text-[11px] font-semibold tabular-nums ${
+                        delta > 0 ? 'text-primary' : delta < 0 ? 'text-danger' : 'text-faint'
+                      }`}
+                      title="较上次记录的变化"
+                    >
+                      {delta > 0 ? <ArrowUp size={11} /> : delta < 0 ? <ArrowDown size={11} /> : <Minus size={11} />}
+                      {delta !== 0 ? Math.abs(delta) : ''}
+                    </span>
+                  ) : null}
+                </li>
+              )
+            })}
+          </ul>
+        </Panel>
+
+        {/* 今日待办 */}
+        <Panel className="p-5 sm:p-6 lg:col-span-3">
+          <div className="flex items-center justify-between gap-3">
+            <h2 className="flex items-center gap-2 font-semibold text-ink">
+              <Sparkles size={18} className="text-exp" /> 今日待办
+            </h2>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-faint">剩余 {pendingTasks.length} 项</span>
+              <SectionLink to="/goals" label="全部任务" />
+            </div>
+          </div>
+          <ul className="mt-4 space-y-2.5">
+            {activeTasks.length > 0 ? (
+              activeTasks.map((task) => (
+                <li
+                  key={task.id}
+                  className="group flex items-center gap-3 rounded-xl border border-line/70 bg-canvas/40 px-3 py-3 transition-colors hover:border-primary/40"
+                >
+                  <button
+                    type="button"
+                    className="flex size-7 shrink-0 items-center justify-center rounded-full border-2 border-line text-transparent transition-all hover:border-primary hover:bg-primary-soft hover:text-primary"
+                    aria-label={`完成任务：${task.name}`}
+                    onClick={() => void handleQuickComplete(task)}
+                  >
+                    <Check size={15} strokeWidth={3} />
+                  </button>
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate text-sm font-medium text-ink">{task.name}</p>
+                    <p className="mt-0.5 text-xs text-faint">
+                      {task.type ? `${task.type} · ` : ''}截止 {formatDate(task.dueDate)}
+                    </p>
+                  </div>
+                  {task.rewards.exp > 0 ? (
+                    <span className="shrink-0 rounded-full border border-exp/30 bg-exp-soft px-2 py-0.5 text-xs font-bold text-exp">
+                      +{task.rewards.exp} EXP
+                    </span>
+                  ) : null}
+                </li>
+              ))
+            ) : (
+              <li className="rounded-xl border border-dashed border-line/80 py-8 text-center text-sm text-muted">
+                所有任务都完成了，去创建新的挑战吧
+              </li>
+            )}
+          </ul>
         </Panel>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-[1.5fr_0.8fr]">
-        <Panel className="p-5 sm:p-6">
-          <h2 className="flex items-center gap-2 font-semibold text-ink">
-            <TrendingUp size={18} className="text-primary" /> 属性趋势
-          </h2>
-          <p className="mt-1 text-sm text-muted">最近八条属性快照</p>
+      <section className="grid gap-5 lg:grid-cols-3">
+        {/* 属性趋势 */}
+        <Panel className="p-5 sm:p-6 lg:col-span-2">
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-semibold text-ink">
+              <TrendingUp size={18} className="text-primary" /> 属性趋势
+            </h2>
+            <span className="text-xs text-faint">最近 {Math.min(data.stats.history.length, 8)} 条快照</span>
+          </div>
           <div className="mt-5">
             <StatTrendChart history={data.stats.history} />
           </div>
         </Panel>
 
-        <Panel className="p-5 sm:p-6">
-          <h2 className="flex items-center gap-2 font-semibold text-ink">
-            <Swords size={18} className="text-primary" /> Boss 挑战
-          </h2>
+        {/* Boss 挑战 */}
+        <Panel className="flex flex-col p-5 sm:p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="flex items-center gap-2 font-semibold text-ink">
+              <Swords size={18} className="text-danger" /> Boss 挑战
+            </h2>
+            <SectionLink to="/bosses" label="挑战列表" />
+          </div>
           {activeBoss ? (
-            <div className="mt-5">
+            <div className="mt-5 flex flex-1 flex-col">
               <div className="flex items-start justify-between gap-3">
-                <div>
-                  <h3 className="text-lg font-medium text-ink">{activeBoss.name}</h3>
-                  <p className="mt-1 text-sm text-muted">{activeBoss.description}</p>
-                </div>
+                <h3 className="text-lg font-medium text-ink">{activeBoss.name}</h3>
                 <StatusBadge value={activeBoss.status} />
               </div>
-              <div className="mt-5">
+              <div className="mt-4">
                 <ProgressBar
-                  value={activeBoss.maxHp - activeBoss.currentHp}
+                  value={activeBoss.currentHp}
                   max={activeBoss.maxHp}
-                  tone={activeBoss.currentHp === 0 ? 'primary' : 'danger'}
-                  label={`剩余 HP ${formatNumber(activeBoss.currentHp)} / ${formatNumber(activeBoss.maxHp)}`}
+                  tone="danger"
+                  size="lg"
+                  label={`HP ${formatNumber(activeBoss.currentHp)} / ${formatNumber(activeBoss.maxHp)}`}
                 />
               </div>
-              <p className="mt-4 text-sm text-muted">截止：{formatDate(activeBoss.deadline)}</p>
+              <p className="mt-4 text-xs text-faint">截止：{formatDate(activeBoss.deadline)}</p>
+              <Link
+                to="/bosses"
+                className="mt-4 flex min-h-10 items-center justify-center gap-2 rounded-xl border border-danger/50 bg-danger-soft text-sm font-medium text-danger transition-colors hover:bg-danger/25"
+              >
+                <Swords size={15} /> 继续挑战
+              </Link>
             </div>
           ) : (
-            <p className="mt-5 text-sm text-muted">暂时没有 Boss 挑战。</p>
+            <p className="mt-5 flex-1 text-sm text-muted">
+              暂时没有 Boss 挑战。把一个阶段性难题设置成 Boss，用任务逐步击破它。
+            </p>
           )}
         </Panel>
       </section>
 
-      <section className="grid gap-5 xl:grid-cols-3">
-        <Panel className="p-5">
-          <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-ink">待完成任务</h2>
-            <span className="text-xs text-muted">{activeTasks.length} 项</span>
-          </div>
-          <div className="mt-4 divide-y divide-line">
-            {activeTasks.length > 0 ? (
-              activeTasks.map((task) => (
-                <div key={task.id} className="flex items-center gap-3 py-3 first:pt-0 last:pb-0">
-                  <button
-                    type="button"
-                    className="size-5 shrink-0 rounded border border-line hover:border-primary"
-                    aria-label={`完成任务：${task.name}`}
-                    onClick={() => void completeTask(task.id)}
-                  />
-                  <div className="min-w-0 flex-1">
-                    <p className="truncate text-sm font-medium text-ink">{task.name}</p>
-                    <p className="mt-0.5 text-xs text-muted">{formatDate(task.dueDate)}</p>
-                  </div>
-                  <span className="shrink-0 text-xs font-medium text-exp">+{task.rewards.exp} EXP</span>
-                </div>
-              ))
-            ) : (
-              <p className="py-8 text-center text-sm text-muted">所有任务都完成了</p>
-            )}
-          </div>
-        </Panel>
-
-        <Panel className="p-5">
+      <section className="grid gap-5 lg:grid-cols-2">
+        {/* 技能概览 */}
+        <Panel className="p-5 sm:p-6">
           <div className="flex items-center justify-between">
             <h2 className="font-semibold text-ink">技能概览</h2>
-            <span className="text-xs text-muted">{data.skills.length} 项技能</span>
+            <div className="flex items-center gap-3">
+              <span className="text-xs text-faint">{data.skills.length} 项技能</span>
+              <SectionLink to="/skills" label="技能树" />
+            </div>
           </div>
-          <div className="mt-4 divide-y divide-line">
-            {featuredSkills.map((skill) => (
-              <div key={skill.id} className="py-3 first:pt-0 last:pb-0">
-                <div className="flex items-center justify-between gap-3 text-sm">
-                  <span className="font-medium text-ink">{skill.name}</span>
-                  <span className="text-primary">Lv.{skill.level}</span>
-                </div>
-                <div className="mt-2">
-                  <ProgressBar value={skill.exp} max={skill.expToNextLevel} />
-                </div>
-              </div>
-            ))}
-          </div>
+          <ul className="mt-4 space-y-4">
+            {featuredSkills.length > 0 ? (
+              featuredSkills.map((skill) => (
+                <li key={skill.id}>
+                  <div className="flex items-center justify-between gap-3 text-sm">
+                    <span className="truncate font-medium text-ink">{skill.name}</span>
+                    <span className="shrink-0 rounded-md bg-primary-soft px-1.5 py-0.5 text-xs font-bold text-primary">
+                      Lv.{skill.level}
+                    </span>
+                  </div>
+                  <ProgressBar
+                    className="mt-2"
+                    value={skill.exp}
+                    max={skill.expToNextLevel}
+                    tone="exp"
+                    size="sm"
+                  />
+                </li>
+              ))
+            ) : (
+              <li className="py-6 text-center text-sm text-muted">还没有技能，去技能树点亮第一项</li>
+            )}
+          </ul>
         </Panel>
 
-        <Panel className="p-5">
+        {/* 最近事件 */}
+        <Panel className="p-5 sm:p-6">
           <div className="flex items-center justify-between">
-            <h2 className="font-semibold text-ink">最近事件</h2>
-            <span className="text-xs text-muted">累计 {data.events.length}</span>
+            <h2 className="flex items-center gap-2 font-semibold text-ink">
+              <ScrollText size={18} className="text-info" /> 最近事件
+            </h2>
+            <SectionLink to="/events" label="人生日志" />
           </div>
           <ol className="mt-4 space-y-4">
-            {recentEvents.map((event) => (
-              <li key={event.id} className="relative border-l border-line pl-4">
-                <span className="absolute -left-1 top-1.5 size-2 rounded-full bg-primary" />
-                <p className="text-sm font-medium text-ink">{event.title}</p>
-                <p className="mt-1 text-xs text-muted">{formatDate(event.date)}</p>
-              </li>
-            ))}
+            {recentEvents.length > 0 ? (
+              recentEvents.map((event) => (
+                <li key={event.id} className="relative border-l border-line pl-4">
+                  <span className="absolute -left-[5px] top-1.5 size-2.5 rounded-full border-2 border-canvas bg-primary shadow-[0_0_8px_rgb(62_207_142/0.6)]" />
+                  <p className="text-sm font-medium text-ink">{event.title}</p>
+                  <p className="mt-1 text-xs text-faint">{formatDate(event.date)}</p>
+                </li>
+              ))
+            ) : (
+              <li className="py-6 text-center text-sm text-muted">还没有事件记录</li>
+            )}
           </ol>
         </Panel>
       </section>
@@ -217,6 +320,7 @@ export function DashboardPage() {
         onClose={() => setStatOpen(false)}
         onSave={changeStat}
       />
+      <RewardCelebration celebration={celebration} onClose={dismiss} />
     </div>
   )
 }

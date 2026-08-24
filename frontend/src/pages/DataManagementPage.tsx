@@ -102,6 +102,7 @@ export function DataManagementPage() {
   return (
     <div className="space-y-6">
       <PageHeader
+        eyebrow="Archive"
         title="数据管理"
         description="所有成长数据保存在当前浏览器中；建议定期导出 JSON 备份。"
       />
@@ -114,10 +115,10 @@ export function DataManagementPage() {
       {(feedback || storeError) ? (
         <p
           role={feedback?.tone === 'error' || storeError ? 'alert' : 'status'}
-          className={`rounded-xl px-4 py-3 text-sm ${
+          className={`rounded-xl border px-4 py-3 text-sm ${
             feedback?.tone === 'error' || storeError
-              ? 'bg-red-50 text-danger'
-              : 'bg-primary-soft text-primary'
+              ? 'border-danger/30 bg-danger-soft text-danger'
+              : 'border-primary/30 bg-primary-soft text-primary'
           }`}
         >
           {feedback?.message ?? storeError}
@@ -182,7 +183,7 @@ export function DataManagementPage() {
       <Panel className="p-5 sm:p-6">
         <h2 className="font-semibold text-ink">本地存储说明</h2>
         <div className="mt-4 grid gap-4 sm:grid-cols-2">
-          <div className="flex gap-3 rounded-xl bg-canvas p-4">
+          <div className="flex gap-3 rounded-xl border border-line bg-raised/50 p-4">
             <Database size={20} className="mt-0.5 shrink-0 text-primary" />
             <div>
               <h3 className="text-sm font-medium text-ink">IndexedDB</h3>
@@ -191,7 +192,7 @@ export function DataManagementPage() {
               </p>
             </div>
           </div>
-          <div className="flex gap-3 rounded-xl bg-canvas p-4">
+          <div className="flex gap-3 rounded-xl border border-line bg-raised/50 p-4">
             <Settings size={20} className="mt-0.5 shrink-0 text-primary" />
             <div>
               <h3 className="text-sm font-medium text-ink">localStorage</h3>
