@@ -44,6 +44,28 @@ interface SkillBranchProps {
   onDelete: (skill: Skill) => void
 }
 
+const HEX_CLIP = 'polygon(25% 3%, 75% 3%, 100% 50%, 75% 97%, 25% 97%, 0 50%)'
+
+/** 六边形技能徽记：外缘颜色代表段位 */
+function SkillHex({ skill, color }: { skill: Skill; color: string }) {
+  return (
+    <span
+      className="relative size-12 shrink-0"
+      style={{ backgroundColor: color, clipPath: HEX_CLIP }}
+    >
+      <span
+        className="absolute inset-[2.5px] flex flex-col items-center justify-center bg-surface"
+        style={{ clipPath: HEX_CLIP }}
+      >
+        <span className="text-[8px] font-medium leading-none text-faint">Lv</span>
+        <span className="text-sm font-black leading-none tabular-nums" style={{ color }}>
+          {skill.level}
+        </span>
+      </span>
+    </span>
+  )
+}
+
 function SkillBranch({ skill, childrenMap, onEdit, onDelete }: SkillBranchProps) {
   const tier = skillTier(skill)
   const untouched = tier.id === 'untouched'
@@ -53,18 +75,11 @@ function SkillBranch({ skill, childrenMap, onEdit, onDelete }: SkillBranchProps)
     <div>
       <div
         className={cn(
-          'group flex items-center gap-3 rounded-2xl border border-transparent px-2 py-3 transition-colors hover:border-line hover:bg-ink/4 sm:px-3',
+          'group flex items-start gap-3 rounded-xl border border-transparent px-2 py-3 transition-colors hover:border-line hover:bg-ink/4 sm:px-3',
           untouched && 'opacity-55',
         )}
       >
-        {/* 技能徽记：外圈颜色代表段位 */}
-        <span
-          className="flex size-11 shrink-0 flex-col items-center justify-center rounded-xl border bg-canvas/60 font-black leading-none"
-          style={{ borderColor: `${tier.color}66`, color: tier.color }}
-        >
-          <span className="text-[9px] font-medium opacity-70">Lv</span>
-          <span className="text-sm tabular-nums">{skill.level}</span>
-        </span>
+        <SkillHex skill={skill} color={tier.color} />
 
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
@@ -113,17 +128,28 @@ function SkillBranch({ skill, childrenMap, onEdit, onDelete }: SkillBranchProps)
         </div>
       </div>
 
-      {/* 子技能：用左侧竖线表达成长路径 */}
+      {/* 子技能：肘形连接线画出真正的分支 */}
       {children.length > 0 ? (
-        <div className="ml-5 space-y-1 border-l border-line/70 pl-3 sm:ml-7 sm:pl-4">
-          {children.map((child) => (
-            <SkillBranch
-              key={child.id}
-              skill={child}
-              childrenMap={childrenMap}
-              onEdit={onEdit}
-              onDelete={onDelete}
-            />
+        <div className="ml-5 sm:ml-7">
+          {children.map((child, childIndex) => (
+            <div key={child.id} className="relative pl-5">
+              <span
+                aria-hidden
+                className="absolute left-0 top-0 h-9 w-4 rounded-bl-xl border-b border-l border-[#c9bda2]"
+              />
+              {childIndex < children.length - 1 ? (
+                <span
+                  aria-hidden
+                  className="absolute bottom-0 left-0 top-9 border-l border-[#c9bda2]"
+                />
+              ) : null}
+              <SkillBranch
+                skill={child}
+                childrenMap={childrenMap}
+                onEdit={onEdit}
+                onDelete={onDelete}
+              />
+            </div>
           ))}
         </div>
       ) : null}

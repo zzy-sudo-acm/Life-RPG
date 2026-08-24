@@ -1,7 +1,7 @@
 import { Map, Plus } from 'lucide-react'
 import { useState } from 'react'
+import { JourneyMap } from '../components/timeline/JourneyMap'
 import { TimelineNodeEditor } from '../components/timeline/TimelineNodeEditor'
-import { TimelineTree } from '../components/timeline/TimelineTree'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { PageHeader } from '../components/ui/PageHeader'
@@ -52,7 +52,7 @@ export function TimelinePage() {
           action={<Button icon={<Map size={16} />} onClick={() => setEditor('new')}>建立路线起点</Button>}
         />
       ) : (
-        <TimelineTree
+        <JourneyMap
           nodes={data.timeline}
           onEdit={setEditor}
           onDelete={(node) => void handleDelete(node)}

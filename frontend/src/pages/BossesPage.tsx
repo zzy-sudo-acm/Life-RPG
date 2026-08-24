@@ -1,6 +1,7 @@
-import { Pencil, Plus, Skull, Swords, Trash2 } from 'lucide-react'
+import { Pencil, Plus, Skull, Swords, Trash2, Trophy } from 'lucide-react'
 import { useState } from 'react'
 import { BossDamageEditor } from '../components/bosses/BossDamageEditor'
+import { BossDamageSpark } from '../components/bosses/BossDamageSpark'
 import { BossEditor } from '../components/bosses/BossEditor'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
@@ -42,6 +43,9 @@ export function BossesPage() {
     setEditorOpen(true)
   }
 
+  const defeatedCount = bosses.filter((boss) => boss.status === 'defeated' || boss.currentHp === 0).length
+  const activeCount = bosses.filter((boss) => boss.status === 'active').length
+
   const handleDelete = async (boss: Boss): Promise<void> => {
     const rewardTaskCount = data.tasks.filter((task) =>
       task.rewards.bosses.some((reward) => reward.bossId === boss.id),
@@ -66,6 +70,23 @@ export function BossesPage() {
           </Button>
         }
       />
+
+      {bosses.length > 0 ? (
+        <div className="flex flex-wrap gap-2" aria-label="悬赏统计">
+          <span className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-muted">
+            <Swords size={13} className="text-danger" />
+            进行中 <b className="font-display text-sm text-ink">{activeCount}</b>
+          </span>
+          <span className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-muted">
+            <Trophy size={13} className="text-exp" />
+            已讨伐 <b className="font-display text-sm text-ink">{defeatedCount}</b>
+          </span>
+          <span className="flex items-center gap-1.5 rounded-lg border border-line bg-surface px-3 py-1.5 text-xs text-muted">
+            <Skull size={13} className="text-faint" />
+            悬赏总数 <b className="font-display text-sm text-ink">{bosses.length}</b>
+          </span>
+        </div>
+      ) : null}
 
       {bosses.length === 0 ? (
         <EmptyState
@@ -136,6 +157,8 @@ export function BossesPage() {
                     label={`HP ${formatNumber(boss.currentHp)} / ${formatNumber(boss.maxHp)}`}
                   />
                 </div>
+
+                <BossDamageSpark bossId={boss.id} events={data.events} />
 
                 <div className="mt-4 flex items-center gap-2 border-t border-line/80 pt-4">
                   <Button

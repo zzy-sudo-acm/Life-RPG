@@ -34,9 +34,9 @@ export function ProgressBar({
   return (
     <div className={cn('space-y-1.5', className)}>
       {label ? (
-        <div className="flex justify-between text-xs text-muted">
-          <span>{label}</span>
-          <span className="tabular-nums">{Math.round(percentage)}%</span>
+        <div className="flex justify-between gap-2 text-xs text-muted">
+          <span className="whitespace-nowrap">{label}</span>
+          <span className="shrink-0 tabular-nums">{Math.round(percentage)}%</span>
         </div>
       ) : null}
       <div

@@ -47,6 +47,13 @@ export function AchievementsEquipmentPage() {
 
   const unlockedCount = data.achievements.filter((item) => item.unlockedAt !== null).length
 
+  // 品质图鉴：从传说排到普通
+  const qualityOrder: EquipmentQuality[] = ['legendary', 'epic', 'rare', 'fine', 'common']
+  const qualityCounts = qualityOrder.map((quality) => ({
+    quality,
+    count: data.equipment.filter((item) => item.quality === quality).length,
+  }))
+
   const deleteAchievement = (achievement: Achievement) => {
     if (!window.confirm(`确定删除成就“${achievement.name}”吗？`)) return
     setError(null)
@@ -195,6 +202,42 @@ export function AchievementsEquipmentPage() {
           </Button>
         </div>
 
+        {/* 品质图鉴：堆叠条 + 计数 */}
+        {data.equipment.length > 0 ? (
+          <div className="rounded-xl border border-line bg-surface px-4 py-3.5">
+            <div
+              className="flex h-2.5 overflow-hidden rounded-full border border-line"
+              role="img"
+              aria-label="装备品质分布"
+            >
+              {qualityCounts
+                .filter(({ count }) => count > 0)
+                .map(({ quality, count }) => (
+                  <span
+                    key={quality}
+                    title={`${QUALITY_LABELS[quality]} ${count} 件`}
+                    style={{
+                      width: `${(count / data.equipment.length) * 100}%`,
+                      backgroundColor: QUALITY_COLORS[quality],
+                    }}
+                  />
+                ))}
+            </div>
+            <ul className="mt-2.5 flex flex-wrap gap-x-4 gap-y-1 text-xs text-muted">
+              {qualityCounts.map(({ quality, count }) => (
+                <li key={quality} className="flex items-center gap-1.5">
+                  <span
+                    className="size-2 rotate-45"
+                    style={{ backgroundColor: QUALITY_COLORS[quality] }}
+                  />
+                  {QUALITY_LABELS[quality]}
+                  <b className="font-display tabular-nums text-ink">{count}</b>
+                </li>
+              ))}
+            </ul>
+          </div>
+        ) : null}
+
         {data.equipment.length === 0 ? (
           <EmptyState
             icon={<Package size={22} />}
@@ -228,12 +271,8 @@ export function AchievementsEquipmentPage() {
                   <div className="flex items-start justify-between gap-3">
                     <h3 className="font-display font-bold text-ink">{equipment.name}</h3>
                     <span
-                      className="shrink-0 rounded border px-2 py-0.5 text-xs font-semibold"
-                      style={{
-                        borderColor: `${qualityColor}66`,
-                        backgroundColor: `${qualityColor}12`,
-                        color: qualityColor,
-                      }}
+                      className="shrink-0 rounded px-2.5 py-1 text-xs font-bold text-[#fbf7ee] shadow-[0_1px_3px_rgb(44_38_32/0.25)]"
+                      style={{ backgroundColor: qualityColor }}
                     >
                       {QUALITY_LABELS[equipment.quality]}
                     </span>
