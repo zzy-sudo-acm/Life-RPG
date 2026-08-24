@@ -18,10 +18,10 @@ interface SkillTier {
 }
 
 function skillTier(skill: Skill): SkillTier {
-  if (skill.level >= 20) return { label: '大师', color: '#f2b23e' }
-  if (skill.level >= 10) return { label: '精通', color: '#b07cf6' }
-  if (skill.level >= 5) return { label: '熟练', color: '#4cc2ff' }
-  return { label: '入门', color: '#3ecf8e' }
+  if (skill.level >= 20) return { label: '大师', color: '#a97c1f' }
+  if (skill.level >= 10) return { label: '精通', color: '#6a5a8a' }
+  if (skill.level >= 5) return { label: '熟练', color: '#4a6a8a' }
+  return { label: '入门', color: '#4a7a5e' }
 }
 
 /** 尚未投入任何经验的技能显示为「未点亮」状态。 */
@@ -68,7 +68,7 @@ function SkillBranch({ skill, childrenMap, onEdit, onDelete }: SkillBranchProps)
     <div>
       <div
         className={cn(
-          'group flex items-center gap-3 rounded-2xl border border-transparent px-2 py-3 transition-colors hover:border-line hover:bg-white/3 sm:px-3',
+          'group flex items-center gap-3 rounded-2xl border border-transparent px-2 py-3 transition-colors hover:border-line hover:bg-ink/4 sm:px-3',
           untouched && 'opacity-55',
         )}
       >
@@ -251,7 +251,7 @@ export function SkillsPage() {
                     <div className="flex flex-wrap items-center gap-2">
                       <GitBranch size={17} className="shrink-0 text-primary" />
                       <h2 className="font-semibold text-ink">{category.name}</h2>
-                      <span className="rounded-full border border-line bg-white/5 px-2 py-0.5 text-xs text-muted">
+                      <span className="rounded-full border border-line bg-ink/4 px-2 py-0.5 text-xs text-muted">
                         {categorySkills.length} 项 · 总 Lv.{totalLevels}
                       </span>
                     </div>

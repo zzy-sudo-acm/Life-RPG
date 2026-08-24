@@ -51,8 +51,8 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
         {STAT_KEYS.map((key: StatKey) => (
           <span key={key} className="inline-flex items-center gap-1.5">
             <span
-              className="size-2 rounded-full shadow-[0_0_6px_currentColor]"
-              style={{ backgroundColor: STAT_COLORS[key], color: STAT_COLORS[key] }}
+              className="size-2 rotate-45"
+              style={{ backgroundColor: STAT_COLORS[key] }}
             />
             {STAT_LABELS[key]}
           </span>
@@ -74,10 +74,11 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
                   x2={WIDTH - PADDING.right}
                   y1={y}
                   y2={y}
-                  stroke="#232b3d"
+                  stroke="#ddd2ba"
                   strokeWidth="1"
+                  strokeDasharray="3 4"
                 />
-                <text x={PADDING.left - 10} y={y + 4} textAnchor="end" fontSize="11" fill="#68718a">
+                <text x={PADDING.left - 10} y={y + 4} textAnchor="end" fontSize="11" fill="#9a8d7a">
                   {value}
                 </text>
               </g>
@@ -91,7 +92,7 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
               y={HEIGHT - 14}
               textAnchor={index === 0 ? 'start' : index === points.length - 1 ? 'end' : 'middle'}
               fontSize="11"
-              fill="#68718a"
+              fill="#9a8d7a"
             >
               {monthLabel(point.recordedAt)}
             </text>
@@ -114,7 +115,6 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
                     strokeWidth="2"
                     strokeLinejoin="round"
                     strokeLinecap="round"
-                    style={{ filter: `drop-shadow(0 0 5px ${STAT_COLORS[key]}55)` }}
                   />
                 ) : null}
                 {coordinates.map(({ x, y, value }, index) => (
@@ -124,7 +124,7 @@ export function StatTrendChart({ history }: StatTrendChartProps) {
                     cy={y}
                     r="3"
                     fill={STAT_COLORS[key]}
-                    stroke="#090d16"
+                    stroke="#fbf7ee"
                     strokeWidth="1.5"
                   >
                     <title>{`${STAT_LABELS[key]}：${value}`}</title>

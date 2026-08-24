@@ -1,18 +1,18 @@
-import { CheckCircle2, Sparkles, Swords, TrendingUp, Trophy, Zap } from 'lucide-react'
+import { Sparkles, Swords, TrendingUp, Trophy, Zap } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { useAppStore } from '../../store/AppStoreContext'
 import { STAT_KEYS, STAT_LABELS } from '../../types/models'
 import { formatNumber } from '../../utils/format'
 import type { Celebration } from './useRewardCelebration'
 
-const PARTICLES = ['+EXP', '★', '+成长', '✦', '+EXP', '★', '✦', '+1']
+const PARTICLES = ['✦', '❋', '✧', '✦', '❋', '✧', '✦', '❋']
 
 interface RewardCelebrationProps {
   celebration: Celebration | null
   onClose: () => void
 }
 
-/** 任务结算后的全屏庆祝浮层：金色光晕、奖励清单与升级提示。 */
+/** 任务结算后的庆祝浮层：朱红「成」字印盖下，列出全部收获。 */
 export function RewardCelebration({ celebration, onClose }: RewardCelebrationProps) {
   const { data } = useAppStore()
 
@@ -33,7 +33,7 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
       lines.push({
         icon: Zap,
         text: `EXP +${formatNumber(rewards.exp)}`,
-        className: 'border-exp/40 bg-exp-soft text-exp',
+        className: 'border-exp/45 bg-exp-soft text-exp',
       })
     }
     for (const key of STAT_KEYS) {
@@ -42,7 +42,7 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
         lines.push({
           icon: TrendingUp,
           text: `${STAT_LABELS[key]} +${amount}`,
-          className: 'border-primary/40 bg-primary-soft text-primary',
+          className: 'border-primary/40 bg-primary-soft text-primary-deep',
         })
       }
     }
@@ -69,7 +69,7 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/70 p-6 backdrop-blur-sm"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/50 p-6"
       role="alertdialog"
       aria-modal="true"
       aria-label="任务完成奖励"
@@ -77,12 +77,12 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
         if (event.target === event.currentTarget) onClose()
       }}
     >
-      {/* 漂浮粒子 */}
+      {/* 漂浮墨点 */}
       <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
         {PARTICLES.map((text, index) => (
           <span
             key={`${text}-${index}`}
-            className="absolute bottom-[28%] animate-float-up text-sm font-bold text-exp/90"
+            className="absolute bottom-[28%] animate-float-up text-sm text-exp"
             style={{
               left: `${12 + index * 10}%`,
               animationDelay: `${index * 0.14}s`,
@@ -93,31 +93,30 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
         ))}
       </div>
 
-      <div className="relative w-full max-w-sm animate-pop-in rounded-3xl border border-exp/30 bg-surface p-6 text-center shadow-[0_0_80px_rgb(242_178_62/0.22)]">
-        <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden rounded-3xl">
-          <div className="absolute -top-20 left-1/2 h-40 w-72 -translate-x-1/2 rounded-full bg-exp/15 blur-3xl" />
+      <div className="relative w-full max-w-sm animate-pop-in rounded-xl border border-[#c6b898] bg-surface p-6 text-center shadow-[0_24px_70px_rgb(44_38_32/0.4)]">
+        {/* 朱红「成」字印，盖下来 */}
+        <div className="relative mx-auto w-fit animate-stamp">
+          <span className="seal flex size-20 items-center justify-center rounded-xl font-display text-4xl font-bold">
+            成
+          </span>
         </div>
 
-        <span className="relative mx-auto flex size-16 items-center justify-center rounded-full border border-primary/45 bg-primary-soft text-primary shadow-[0_0_28px_rgb(62_207_142/0.4)]">
-          <CheckCircle2 size={32} />
-        </span>
-
-        <h2 className="relative mt-4 text-xl font-bold text-ink">任务完成</h2>
-        <p className="relative mt-1 truncate text-sm text-muted">{celebration.title}</p>
+        <h2 className="mt-4 font-display text-xl font-bold text-ink">任务完成</h2>
+        <p className="mt-1 truncate font-kai text-sm text-muted">{celebration.title}</p>
 
         {leveledUp ? (
-          <p className="relative mx-auto mt-4 flex w-fit items-center gap-2 rounded-full border border-exp/50 bg-exp-soft px-4 py-1.5 text-sm font-black tracking-wide text-exp shadow-[0_0_20px_rgb(242_178_62/0.35)]">
+          <p className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-lg border border-exp/50 bg-exp-soft px-4 py-1.5 font-display text-sm font-bold tracking-wide text-exp">
             <Trophy size={16} />
-            LEVEL UP！Lv.{celebration.baseLevel} → Lv.{data.character.level}
+            升级！Lv.{celebration.baseLevel} → Lv.{data.character.level}
           </p>
         ) : null}
 
         {rewardLines.length > 0 ? (
-          <ul className="relative mt-5 flex flex-wrap justify-center gap-2">
+          <ul className="mt-5 flex flex-wrap justify-center gap-2">
             {rewardLines.map(({ icon: Icon, text, className }) => (
               <li
                 key={text}
-                className={`flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-sm font-semibold ${className}`}
+                className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-semibold ${className}`}
               >
                 <Icon size={14} />
                 {text}
@@ -125,12 +124,12 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
             ))}
           </ul>
         ) : (
-          <p className="relative mt-5 text-sm text-muted">这个任务没有设置奖励</p>
+          <p className="mt-5 font-kai text-sm text-muted">这个任务没有设置奖励</p>
         )}
 
         <button
           type="button"
-          className="relative mt-6 min-h-11 w-full rounded-xl border border-exp/60 bg-gradient-to-b from-exp to-[#c8871d] text-sm font-bold text-[#241600] shadow-[0_6px_20px_rgb(242_178_62/0.3)] transition-all hover:brightness-110 active:scale-[0.98]"
+          className="mt-6 min-h-11 w-full rounded-lg border border-[#8a6316] bg-exp text-sm font-bold text-[#fdf8ec] shadow-[0_2px_0_rgb(122_88_16/0.9)] transition-all hover:bg-[#96690f] active:translate-y-px active:shadow-none"
           onClick={onClose}
         >
           收下奖励

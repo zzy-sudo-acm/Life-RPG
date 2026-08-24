@@ -25,16 +25,16 @@ export function StatusBadge({ value }: StatusBadgeProps) {
   return (
     <span
       className={cn(
-        'inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-medium',
-        positive && 'border-primary/35 bg-primary-soft text-primary',
-        active && 'border-info/35 bg-info-soft text-info',
-        golden && 'border-exp/35 bg-exp-soft text-exp',
-        !positive && !active && !golden && 'border-line bg-white/5 text-muted',
+        'inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-xs font-medium',
+        positive && 'border-primary/40 bg-primary-soft text-primary-deep',
+        active && 'border-info/40 bg-info-soft text-info',
+        golden && 'border-exp/40 bg-exp-soft text-exp',
+        !positive && !active && !golden && 'border-line bg-ink/4 text-muted',
       )}
     >
       <span
         className={cn(
-          'size-1.5 rounded-full',
+          'size-1.5',
           positive && 'bg-primary',
           active && 'bg-info',
           golden && 'bg-exp',

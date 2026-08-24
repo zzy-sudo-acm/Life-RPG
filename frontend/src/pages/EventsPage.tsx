@@ -14,10 +14,10 @@ const SOURCE_META: Record<
   LifeEvent['sourceType'],
   { label: string; icon: typeof PenLine; color: string }
 > = {
-  manual: { label: '手动记录', icon: PenLine, color: '#98a1b6' },
-  task: { label: '任务达成', icon: CheckCircle2, color: '#3ecf8e' },
-  achievement: { label: '成就解锁', icon: Trophy, color: '#f2b23e' },
-  boss: { label: 'Boss 讨伐', icon: Swords, color: '#e35d6a' },
+  manual: { label: '手动记录', icon: PenLine, color: '#6f6455' },
+  task: { label: '任务达成', icon: CheckCircle2, color: '#4a7a5e' },
+  achievement: { label: '成就解锁', icon: Trophy, color: '#a97c1f' },
+  boss: { label: 'Boss 讨伐', icon: Swords, color: '#bd4229' },
 }
 
 export function EventsPage() {

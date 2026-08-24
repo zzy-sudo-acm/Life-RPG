@@ -1,10 +1,10 @@
 import { STAT_KEYS, STAT_LABELS, type StatValues } from '../../types/models'
 import { STAT_COLORS } from './statPalette'
 
-const SIZE = 260
+const SIZE = 292
 const CENTER = SIZE / 2
-const RADIUS = 92
-const LABEL_RADIUS = 116
+const RADIUS = 88
+const LABEL_RADIUS = 112
 
 function polarPoint(index: number, radius: number): { x: number; y: number } {
   // 从正上方开始，顺时针排布五个维度
@@ -28,6 +28,18 @@ function labelAnchor(index: number): 'start' | 'middle' | 'end' {
   return x > 0 ? 'start' : 'end'
 }
 
+/** 四角星路径：让属性顶点像手绘星标 */
+function starPath(cx: number, cy: number, r: number): string {
+  const inner = r * 0.38
+  const points: string[] = []
+  for (let i = 0; i < 8; i += 1) {
+    const radius = i % 2 === 0 ? r : inner
+    const angle = (Math.PI / 4) * i - Math.PI / 2
+    points.push(`${cx + radius * Math.cos(angle)},${cy + radius * Math.sin(angle)}`)
+  }
+  return `M${points.join(' L')} Z`
+}
+
 interface StatsRadarProps {
   values: StatValues
 }
@@ -47,23 +59,17 @@ export function StatsRadar({ values }: StatsRadarProps) {
       viewBox={`0 0 ${SIZE} ${SIZE}`}
       className="mx-auto w-full max-w-[300px]"
       role="img"
-      aria-label="五维属性雷达图"
+      aria-label="五维属性星图"
     >
-      <defs>
-        <radialGradient id="radar-fill" cx="50%" cy="50%" r="65%">
-          <stop offset="0%" stopColor="#3ecf8e" stopOpacity="0.35" />
-          <stop offset="100%" stopColor="#3ecf8e" stopOpacity="0.06" />
-        </radialGradient>
-      </defs>
-
-      {/* 网格环 */}
+      {/* 网格环：虚线墨线 */}
       {[0.33, 0.66, 1].map((ratio) => (
         <polygon
           key={ratio}
           points={polygonPoints(RADIUS * ratio)}
-          fill={ratio === 1 ? 'rgb(255 255 255 / 0.02)' : 'none'}
-          stroke="#2c3852"
+          fill={ratio === 1 ? 'rgb(63 111 82 / 0.04)' : 'none'}
+          stroke="#cfc3a7"
           strokeWidth="1"
+          strokeDasharray={ratio === 1 ? 'none' : '3 4'}
         />
       ))}
 
@@ -77,8 +83,9 @@ export function StatsRadar({ values }: StatsRadarProps) {
             y1={CENTER}
             x2={x}
             y2={y}
-            stroke="#2c3852"
+            stroke="#cfc3a7"
             strokeWidth="1"
+            strokeDasharray="2 4"
           />
         )
       })}
@@ -86,29 +93,22 @@ export function StatsRadar({ values }: StatsRadarProps) {
       {/* 属性多边形 */}
       <polygon
         points={valuePoints}
-        fill="url(#radar-fill)"
-        stroke="#3ecf8e"
+        fill="rgb(63 111 82 / 0.14)"
+        stroke="#3f6f52"
         strokeWidth="2"
         strokeLinejoin="round"
-        style={{ filter: 'drop-shadow(0 0 10px rgb(62 207 142 / 0.35))' }}
       />
 
-      {/* 顶点 */}
+      {/* 顶点星标 */}
       {STAT_KEYS.map((key, index) => {
         const ratio = Math.min(values[key] / scaleMax, 1)
         const { x, y } = polarPoint(index, ratio * RADIUS)
         return (
-          <circle
-            key={key}
-            cx={x}
-            cy={y}
-            r="3.5"
-            fill={STAT_COLORS[key]}
-            stroke="#090d16"
-            strokeWidth="1.5"
-          >
-            <title>{`${STAT_LABELS[key]}：${values[key]}`}</title>
-          </circle>
+          <g key={key}>
+            <path d={starPath(x, y, 7)} fill={STAT_COLORS[key]} stroke="#fbf7ee" strokeWidth="1.5">
+              <title>{`${STAT_LABELS[key]}：${values[key]}`}</title>
+            </path>
+          </g>
         )
       })}
 
@@ -123,7 +123,7 @@ export function StatsRadar({ values }: StatsRadarProps) {
             y={y}
             textAnchor={anchor}
             fontSize="11"
-            fill="#98a1b6"
+            fill="#6f6455"
           >
             {STAT_LABELS[key]}
             <tspan

@@ -368,7 +368,7 @@ export function GoalsTasksPage() {
                           </h3>
                           <StatusBadge value={task.status} />
                           {task.type ? (
-                            <span className="rounded-md border border-line bg-white/5 px-2 py-0.5 text-xs text-muted">
+                            <span className="rounded border border-line bg-ink/4 px-2 py-0.5 text-xs text-muted">
                               {task.type}
                             </span>
                           ) : null}

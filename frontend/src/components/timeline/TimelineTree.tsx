@@ -56,28 +56,28 @@ function flattenNodes(nodes: TimelineNode[]): FlatNode[] {
   return result
 }
 
-/** 阶段节点标记：已完成=翡翠勾，当前=脉动信标，未来=空心暗点。 */
+/** 旅程节点标记：已完成=竹青勾，当前=朱红旗帜，未来=空心墨点。 */
 function NodeMarker({ status }: { status: TimelineNode['status'] }) {
   if (status === 'past') {
     return (
-      <span className="flex size-9 items-center justify-center rounded-full border border-primary/50 bg-primary-soft text-primary shadow-[0_0_14px_rgb(62_207_142/0.3)]">
+      <span className="flex size-9 items-center justify-center rounded-full border border-primary/50 bg-primary-soft text-primary-deep">
         <Check size={16} strokeWidth={3} />
       </span>
     )
   }
   if (status === 'current') {
     return (
-      <span className="relative flex size-9 items-center justify-center rounded-full border border-exp/60 bg-exp-soft text-exp">
+      <span className="relative flex size-9 items-center justify-center rounded-full border border-danger/55 bg-danger-soft text-danger">
         <span
           aria-hidden
-          className="absolute inset-0 animate-pulse-ring rounded-full border border-exp/70"
+          className="absolute inset-0 animate-pulse-ring rounded-full border border-danger/50"
         />
         <MapPin size={16} />
       </span>
     )
   }
   return (
-    <span className="flex size-9 items-center justify-center rounded-full border border-line bg-canvas/70 text-faint">
+    <span className="flex size-9 items-center justify-center rounded-full border border-line bg-surface text-faint">
       <Circle size={13} />
     </span>
   )
@@ -87,7 +87,7 @@ export function TimelineTree({ nodes, onEdit, onDelete }: TimelineTreeProps) {
   const flatNodes = flattenNodes(nodes)
 
   return (
-    <ol className="relative space-y-4 before:absolute before:bottom-6 before:left-[17px] before:top-6 before:w-px before:bg-gradient-to-b before:from-primary/50 before:via-line before:to-line/40">
+    <ol className="relative space-y-4 before:absolute before:bottom-6 before:left-[17px] before:top-6 before:w-px before:bg-gradient-to-b before:from-primary/40 before:via-line before:to-line/50">
       {flatNodes.map(({ node, depth, parentName }) => (
         <li
           key={node.id}
@@ -102,20 +102,20 @@ export function TimelineTree({ nodes, onEdit, onDelete }: TimelineTreeProps) {
           <Panel
             className={cn(
               'p-4 sm:p-5',
-              node.status === 'current' && 'border-exp/35 shadow-[0_0_30px_rgb(242_178_62/0.08)]',
+              node.status === 'current' && 'border-danger/45',
             )}
           >
             <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
               <div className="min-w-0 flex-1">
                 <div className="flex flex-wrap items-center gap-2">
-                  <h2 className="font-semibold text-ink">{node.title}</h2>
+                  <h2 className="font-display font-bold text-ink">{node.title}</h2>
                   <StatusBadge value={node.status} />
-                  <span className="rounded-full border border-line bg-white/5 px-2 py-0.5 text-xs text-muted">
+                  <span className="rounded border border-line bg-ink/4 px-2 py-0.5 text-xs text-muted">
                     {node.stageType || '未分类阶段'}
                   </span>
                 </div>
                 {parentName ? (
-                  <p className="mt-2 text-xs font-medium text-primary">承接自：{parentName}</p>
+                  <p className="mt-2 font-kai text-xs text-primary-deep">承接自：{parentName}</p>
                 ) : null}
                 <p className="mt-2 whitespace-pre-wrap text-sm leading-6 text-muted">
                   {node.description || '暂无描述'}

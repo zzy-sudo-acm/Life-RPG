@@ -122,8 +122,8 @@ export function DashboardPage() {
                   className="flex items-center gap-2 rounded-xl border border-line/70 bg-canvas/40 px-3 py-2"
                 >
                   <span
-                    className="size-2 shrink-0 rounded-full shadow-[0_0_8px_currentColor]"
-                    style={{ backgroundColor: STAT_COLORS[key], color: STAT_COLORS[key] }}
+                    className="size-2 shrink-0 rotate-45"
+                    style={{ backgroundColor: STAT_COLORS[key] }}
                   />
                   <span className="min-w-0 flex-1 truncate text-xs text-muted">
                     {STAT_LABELS[key]}
@@ -296,7 +296,7 @@ export function DashboardPage() {
             {recentEvents.length > 0 ? (
               recentEvents.map((event) => (
                 <li key={event.id} className="relative border-l border-line pl-4">
-                  <span className="absolute -left-[5px] top-1.5 size-2.5 rounded-full border-2 border-canvas bg-primary shadow-[0_0_8px_rgb(62_207_142/0.6)]" />
+                  <span className="absolute -left-[5px] top-1.5 size-2.5 rounded-full border-2 border-surface bg-primary" />
                   <p className="text-sm font-medium text-ink">{event.title}</p>
                   <p className="mt-1 text-xs text-faint">{formatDate(event.date)}</p>
                 </li>

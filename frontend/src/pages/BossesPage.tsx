@@ -1,11 +1,10 @@
-import { Pencil, Plus, Skull, Swords, Trash2, Trophy } from 'lucide-react'
+import { Pencil, Plus, Skull, Swords, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { BossDamageEditor } from '../components/bosses/BossDamageEditor'
 import { BossEditor } from '../components/bosses/BossEditor'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { PageHeader } from '../components/ui/PageHeader'
-import { Panel } from '../components/ui/Panel'
 import { ProgressBar } from '../components/ui/ProgressBar'
 import { StatusBadge } from '../components/ui/StatusBadge'
 import { useAppStore } from '../store/AppStoreContext'
@@ -58,12 +57,12 @@ export function BossesPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Boss Battle"
-        title="Boss 挑战"
-        description="把阶段性难题量化为 HP，通过完成任务或手动记录挑战逐步击破。"
+        eyebrow="Wanted"
+        title="悬赏讨伐"
+        description="把阶段性难题写成一张悬赏令，用一次次行动把它击破。"
         action={
           <Button icon={<Plus size={16} />} onClick={openNewBoss}>
-            新建 Boss
+            张贴悬赏
           </Button>
         }
       />
@@ -71,71 +70,64 @@ export function BossesPage() {
       {bosses.length === 0 ? (
         <EmptyState
           icon={<Skull size={22} />}
-          title="暂时没有 Boss"
+          title="还没有悬赏"
           description="为重要挑战设置生命值，再用现实行动逐步降低它。"
-          action={<Button onClick={openNewBoss}>创建第一个 Boss</Button>}
+          action={<Button onClick={openNewBoss}>张贴第一张悬赏令</Button>}
         />
       ) : (
         <div className="grid items-start gap-4 lg:grid-cols-2 2xl:grid-cols-3">
           {bosses.map((boss) => {
             const defeated = boss.status === 'defeated' || boss.currentHp === 0
             return (
-              <Panel
+              <article
                 key={boss.id}
                 className={cn(
-                  'relative flex flex-col overflow-hidden p-5',
-                  defeated ? 'border-exp/35' : 'border-danger/25',
+                  'relative flex flex-col rounded-xl border bg-surface p-5 shadow-[0_1px_2px_rgb(44_38_32/0.05),0_10px_28px_rgb(44_38_32/0.07)]',
+                  defeated ? 'border-[#c6b898]' : 'border-danger/35',
                 )}
               >
-                {/* 氛围光：未击败为暗红，已击败为金色 */}
-                <span
-                  aria-hidden
-                  className={cn(
-                    'pointer-events-none absolute -top-16 left-1/2 h-32 w-56 -translate-x-1/2 rounded-full blur-3xl',
-                    defeated ? 'bg-exp/15' : 'bg-danger/15',
-                  )}
-                />
+                {/* 已讨伐：斜盖朱印 */}
                 {defeated ? (
                   <span
                     aria-hidden
-                    className="pointer-events-none absolute right-4 top-4 flex rotate-12 items-center gap-1 rounded-lg border-2 border-exp/60 px-2 py-1 text-xs font-black tracking-widest text-exp/90"
+                    className="pointer-events-none absolute right-4 top-4 flex size-16 rotate-12 items-center justify-center rounded-full border-[3px] border-danger/70 font-display text-sm font-bold tracking-widest text-danger/80 shadow-[inset_0_0_0_2px_rgb(189_66_41/0.2)]"
                   >
-                    <Trophy size={12} /> 已讨伐
+                    已讨伐
                   </span>
                 ) : null}
 
-                <div className="relative flex items-start gap-3">
+                <div className="flex items-start gap-3">
                   <span
                     className={cn(
-                      'flex size-12 shrink-0 items-center justify-center rounded-2xl border',
+                      'flex size-12 shrink-0 items-center justify-center rounded-xl border',
                       defeated
-                        ? 'border-exp/40 bg-exp-soft text-exp'
-                        : 'border-danger/40 bg-danger-soft text-danger',
+                        ? 'border-line bg-ink/4 text-faint'
+                        : 'border-danger/45 bg-danger-soft text-danger',
                     )}
                   >
                     <Skull size={24} />
                   </span>
                   <div className="min-w-0 flex-1">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <h2 className="text-lg font-semibold text-ink">{boss.name}</h2>
+                    <div className="flex flex-wrap items-center gap-2 pr-2">
+                      <h2 className="font-display text-lg font-bold text-ink">{boss.name}</h2>
                       <StatusBadge value={boss.status} />
                     </div>
                     <p className="mt-1 text-xs text-faint">
                       {boss.goalId === null
                         ? '未关联目标'
                         : `目标：${goalNames.get(boss.goalId) ?? '未知目标'}`}
-                      {' · '}截止：{formatDate(boss.deadline)}
+                      {' · '}期限：{formatDate(boss.deadline)}
                     </p>
                   </div>
                 </div>
 
                 {boss.description ? (
-                  <p className="relative mt-3 flex-1 text-sm leading-6 text-muted">{boss.description}</p>
+                  <p className="mt-3 flex-1 text-sm leading-6 text-muted">{boss.description}</p>
                 ) : (
                   <div className="flex-1" />
                 )}
 
-                <div className="relative mt-4">
+                <div className="mt-4">
                   <ProgressBar
                     value={boss.currentHp}
                     max={boss.maxHp}
@@ -145,7 +137,7 @@ export function BossesPage() {
                   />
                 </div>
 
-                <div className="relative mt-4 flex items-center gap-2 border-t border-line/60 pt-4">
+                <div className="mt-4 flex items-center gap-2 border-t border-line/80 pt-4">
                   <Button
                     className="flex-1"
                     variant={defeated ? 'secondary' : 'dangerSolid'}
@@ -153,7 +145,7 @@ export function BossesPage() {
                     disabled={defeated}
                     onClick={() => setDamageTarget(boss)}
                   >
-                    {defeated ? '已击破' : '记录伤害'}
+                    {defeated ? '已击破' : '记录讨伐'}
                   </Button>
                   <Button
                     variant="ghost"
@@ -172,7 +164,7 @@ export function BossesPage() {
                     <Trash2 size={15} />
                   </Button>
                 </div>
-              </Panel>
+              </article>
             )
           })}
         </div>
