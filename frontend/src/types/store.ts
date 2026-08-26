@@ -22,7 +22,6 @@ export interface AppStoreValue {
   ) => Promise<void>
   deleteEntity: (collection: EntityCollection, id: string) => Promise<void>
   completeTask: (taskId: string) => Promise<void>
-  damageBoss: (bossId: string, damage: number, note: string) => Promise<void>
   evaluateAchievements: (signal: AchievementSignal) => Promise<void>
   updateSettings: (patch: Partial<LocalSettings>) => void
   createSaveFile: () => Promise<SaveFile>

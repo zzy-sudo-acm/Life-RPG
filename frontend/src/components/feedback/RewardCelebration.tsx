@@ -1,4 +1,4 @@
-import { Sparkles, Swords, TrendingUp, Trophy, Zap } from 'lucide-react'
+import { Flag, Sparkles, TrendingUp, Trophy, Zap } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { useAppStore } from '../../store/AppStoreContext'
 import { STAT_KEYS, STAT_LABELS } from '../../types/models'
@@ -26,7 +26,6 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
     if (celebration === null || data === null) return []
     const { rewards } = celebration
     const skillNames = new Map(data.skills.map((skill) => [skill.id, skill.name]))
-    const bossNames = new Map(data.bosses.map((boss) => [boss.id, boss.name]))
     const lines: Array<{ icon: typeof Zap; text: string; className: string }> = []
 
     if (rewards.exp > 0) {
@@ -53,10 +52,10 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
         className: 'border-info/40 bg-info-soft text-info',
       })
     }
-    for (const reward of rewards.bosses) {
+    if (rewards.goalProgress > 0) {
       lines.push({
-        icon: Swords,
-        text: `${bossNames.get(reward.bossId) ?? 'Boss'} -${reward.damage} HP`,
+        icon: Flag,
+        text: `目标进度 +${rewards.goalProgress}%`,
         className: 'border-danger/40 bg-danger-soft text-danger',
       })
     }
@@ -124,7 +123,7 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
             ))}
           </ul>
         ) : (
-          <p className="mt-5 font-kai text-sm text-muted">这个任务没有设置奖励</p>
+          <p className="mt-5 font-kai text-sm text-muted">奖励已自动结算</p>
         )}
 
         <button

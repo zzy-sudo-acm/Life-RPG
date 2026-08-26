@@ -2,41 +2,41 @@
   "character": {
     "id": "character",
     "name": "冒险者",
-    "profession": "未设定",
+    "profession": "成长探索者",
     "level": 1,
     "exp": 0,
     "expToNextLevel": 100,
     "totalExp": 0,
     "lifeStage": "大学阶段",
     "primaryGoalId": "goal-reading",
-    "createdAt": "2026-08-24T00:00:00.000Z",
-    "updatedAt": "2026-08-24T00:00:00.000Z"
+    "createdAt": "2026-08-24T00:00:00Z",
+    "updatedAt": "2026-08-24T00:00:00Z"
   },
   "stats": {
     "id": "stats",
     "values": {
-      "technical": 0,
-      "intelligence": 0,
-      "creativity": 0,
-      "execution": 0,
-      "health": 0
+      "technical": 10,
+      "intelligence": 10,
+      "creativity": 10,
+      "execution": 10,
+      "health": 10
     },
     "history": [
       {
-        "id": "snapshot-initial",
-        "recordedAt": "2026-08-24T00:00:00.000Z",
+        "id": "stats-initial",
+        "recordedAt": "2026-08-24T00:00:00Z",
         "values": {
-          "technical": 0,
-          "intelligence": 0,
-          "creativity": 0,
-          "execution": 0,
-          "health": 0
+          "technical": 10,
+          "intelligence": 10,
+          "creativity": 10,
+          "execution": 10,
+          "health": 10
         },
         "source": "seed",
         "note": "初始属性"
       }
     ],
-    "updatedAt": "2026-08-24T00:00:00.000Z"
+    "updatedAt": "2026-08-24T00:00:00Z"
   },
   "skillCategories": [
     {
@@ -44,40 +44,32 @@
       "name": "计算机",
       "description": "编程、工程与计算机基础",
       "order": 1,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
     },
     {
       "id": "category-mathematics",
       "name": "数学",
       "description": "数学基础与应用",
       "order": 2,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
     },
     {
       "id": "category-language",
       "name": "语言",
       "description": "语言学习与表达",
       "order": 3,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
-    },
-    {
-      "id": "category-research",
-      "name": "科研",
-      "description": "研究方法与学术能力",
-      "order": 4,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
     },
     {
       "id": "category-sports",
       "name": "运动",
       "description": "运动与体能训练",
-      "order": 5,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
+      "order": 4,
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
     }
   ],
   "skills": [
@@ -90,56 +82,64 @@
       "exp": 0,
       "expToNextLevel": 100,
       "description": "掌握 C++ 基础与工程实践",
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
+    },
+    {
+      "id": "skill-math",
+      "categoryId": "category-mathematics",
+      "parentId": null,
+      "name": "数学",
+      "level": 1,
+      "exp": 0,
+      "expToNextLevel": 100,
+      "description": "持续强化数学基础",
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
     }
   ],
   "goals": [
     {
       "id": "goal-reading",
       "parentId": null,
-      "name": "一年读完 12 本书",
+      "name": "一年读完 12 本书 👹",
       "type": "major",
-      "description": "建立扎实的算法、工程与研究能力",
+      "displayMode": "boss",
+      "description": "用每天完成的小任务，持续推进长期目标。",
       "deadline": null,
       "status": "active",
       "progress": 0,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
     }
   ],
   "tasks": [
     {
       "id": "task-first-step",
       "goalId": "goal-reading",
-      "name": "完成第一个学习任务",
-      "type": "学习",
-      "description": "完成一个 C++ 基础章节并记录收获",
+      "categoryId": "category-mathematics",
+      "name": "数学强化 2h",
+      "description": "完成一个章节并记录错题。",
       "dueDate": null,
+      "difficulty": "medium",
       "status": "todo",
       "rewards": {
-        "exp": 20,
+        "exp": 30,
         "stats": {
-          "technical": 2,
-          "execution": 1
+          "intelligence": 0.5
         },
         "skills": [
           {
-            "skillId": "skill-cpp",
-            "amount": 20
+            "skillId": "skill-math",
+            "amount": 6
           }
         ],
-        "bosses": [
-          {
-            "bossId": "boss-ai-foundation",
-            "damage": 10
-          }
-        ]
+        "goalProgress": 10
       },
       "completedAt": null,
       "rewardApplied": false,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
     }
   ],
   "achievements": [
@@ -149,96 +149,66 @@
       "icon": "🏆",
       "description": "开始使用 Life RPG 记录成长",
       "unlockType": "manual",
-      "unlockedAt": "2026-08-24T00:00:00.000Z",
+      "unlockedAt": "2026-08-24T00:00:00Z",
       "trigger": null,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
-    }
-  ],
-  "equipment": [
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
+    },
     {
-      "id": "equipment-computer",
-      "name": "轻便背包",
-      "quality": "common",
-      "description": "用于学习、编程和完成项目的设备",
-      "statBonuses": {
-        "technical": 1
-      },
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
+      "id": "achievement-seven-tasks",
+      "name": "渐入佳境",
+      "icon": "🔥",
+      "description": "累计完成 7 个任务",
+      "unlockType": "automatic",
+      "unlockedAt": null,
+      "trigger": { "event": "task.completed", "threshold": 7 },
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
+    },
+    {
+      "id": "achievement-goal-completed",
+      "name": "长路抵达",
+      "icon": "🏁",
+      "description": "完成第一个长期目标",
+      "unlockType": "automatic",
+      "unlockedAt": null,
+      "trigger": { "event": "goal.completed", "threshold": 1 },
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
+    },
+    {
+      "id": "achievement-skill-level-five",
+      "name": "技能初成",
+      "icon": "✨",
+      "description": "任意技能达到 5 级",
+      "unlockType": "automatic",
+      "unlockedAt": null,
+      "trigger": { "event": "skill.level", "threshold": 5 },
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
+    },
+    {
+      "id": "achievement-seven-day-streak",
+      "name": "七日坚持",
+      "icon": "📅",
+      "description": "连续 7 天完成任务",
+      "unlockType": "automatic",
+      "unlockedAt": null,
+      "trigger": { "event": "streak.days", "threshold": 7 },
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
     }
   ],
   "events": [
     {
       "id": "event-journey-started",
-      "date": "2026-08-24T00:00:00.000Z",
+      "date": "2026-08-24T00:00:00Z",
       "title": "人生冒险启程",
       "description": "创建了第一份 Life RPG 存档",
-      "rewards": {
-        "exp": 0,
-        "stats": {},
-        "skills": [],
-        "bosses": []
-      },
       "sourceType": "manual",
       "sourceId": null,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
-    }
-  ],
-  "bosses": [
-    {
-      "id": "boss-ai-foundation",
-      "goalId": "goal-reading",
-      "name": "阅读马拉松",
-      "description": "通过持续学习击破基础知识难关",
-      "maxHp": 100,
-      "currentHp": 100,
-      "deadline": null,
-      "status": "active",
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
-    }
-  ],
-  "timeline": [
-    {
-      "id": "timeline-start",
-      "parentId": null,
-      "title": "大学阶段",
-      "description": "积累专业基础并探索长期方向",
-      "stageType": "education",
-      "status": "current",
-      "startDate": null,
-      "endDate": null,
-      "order": 1,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
-    },
-    {
-      "id": "timeline-research",
-      "parentId": "timeline-start",
-      "title": "积累阶段",
-      "description": "确定研究主题并形成专业能力",
-      "stageType": "research",
-      "status": "future",
-      "startDate": null,
-      "endDate": null,
-      "order": 2,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
-    },
-    {
-      "id": "timeline-career",
-      "parentId": "timeline-research",
-      "title": "职业阶段",
-      "description": "将积累的能力投入真实职业挑战",
-      "stageType": "career",
-      "status": "future",
-      "startDate": null,
-      "endDate": null,
-      "order": 3,
-      "createdAt": "2026-08-24T00:00:00.000Z",
-      "updatedAt": "2026-08-24T00:00:00.000Z"
+      "createdAt": "2026-08-24T00:00:00Z",
+      "updatedAt": "2026-08-24T00:00:00Z"
     }
   ]
 }

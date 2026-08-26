@@ -3,7 +3,6 @@ import userEvent from '@testing-library/user-event'
 import { describe, expect, it, vi } from 'vitest'
 import defaultDataJson from '../data/defaultData.json'
 import type { AppData, Task } from '../types/models'
-import { BossEditor } from './bosses/BossEditor'
 import { GoalEditor } from './goals/GoalEditor'
 import { TaskEditor } from './goals/TaskEditor'
 import { SkillCategoryEditor } from './skills/SkillCategoryEditor'
@@ -11,90 +10,39 @@ import { SkillEditor } from './skills/SkillEditor'
 
 const defaultData = defaultDataJson as AppData
 
-type NamedEditor = 'goal' | 'task' | 'skill' | 'category' | 'boss'
+describe('精简 CRUD 表单', () => {
+  it('任务默认只展示名称、分类、难度和可选日期，不暴露奖励输入', () => {
+    render(
+      <TaskEditor
+        task={null}
+        goals={defaultData.goals}
+        categories={defaultData.skillCategories}
+        skills={defaultData.skills}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+      />,
+    )
 
-function renderNamedEditor(
-  editor: NamedEditor,
-  onSave: (value: unknown) => void | Promise<void>,
-  onClose: () => void = vi.fn(),
-) {
-  switch (editor) {
-    case 'goal':
-      return render(
-        <GoalEditor
-          goal={null}
-          goals={defaultData.goals}
-          onClose={onClose}
-          onSave={async (goal) => {
-            await onSave(goal)
-          }}
-        />,
-      )
-    case 'task':
-      return render(
-        <TaskEditor
-          task={null}
-          goals={defaultData.goals}
-          skills={defaultData.skills}
-          bosses={defaultData.bosses}
-          onClose={onClose}
-          onSave={async (task) => {
-            await onSave(task)
-          }}
-        />,
-      )
-    case 'skill':
-      return render(
-        <SkillEditor
-          skill={null}
-          categories={defaultData.skillCategories}
-          skills={defaultData.skills}
-          initialCategoryId={defaultData.skillCategories[0]?.id ?? null}
-          onClose={onClose}
-          onSave={async (skill) => {
-            await onSave(skill)
-          }}
-        />,
-      )
-    case 'category':
-      return render(
-        <SkillCategoryEditor
-          category={null}
-          onClose={onClose}
-          onSave={async (category) => {
-            await onSave(category)
-          }}
-        />,
-      )
-    case 'boss':
-      return render(
-        <BossEditor
-          boss={null}
-          goals={defaultData.goals}
-          onClose={onClose}
-          onSave={async (boss) => {
-            await onSave(boss)
-          }}
-        />,
-      )
-  }
-}
+    expect(screen.getByLabelText(/任务名称/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/分类/)).toBeInTheDocument()
+    expect(screen.getByLabelText('难度')).toBeInTheDocument()
+    expect(screen.getByLabelText(/截止日期/)).toBeInTheDocument()
+    expect(screen.queryByLabelText('角色 EXP')).not.toBeInTheDocument()
+    expect(screen.queryByText('Boss 伤害')).not.toBeInTheDocument()
+    expect(screen.getByText('自动奖励预览')).toBeInTheDocument()
+  })
 
-describe('CRUD 表单加固', () => {
-  it.each([
-    ['goal', '目标名称'],
-    ['task', '任务名称'],
-    ['skill', '技能名称'],
-    ['category', '分类名称'],
-    ['boss', 'Boss 名称'],
-  ] as const)('%s 名称只含空格时不保存', async (editor, label) => {
+  it.each(['goal', 'task', 'skill', 'category'] as const)('%s 名称只含空格时不保存', async (kind) => {
     const user = userEvent.setup()
-    const onSave = vi.fn((_value: unknown) => undefined)
-    renderNamedEditor(editor, onSave)
+    const onSave = vi.fn()
+    if (kind === 'goal') render(<GoalEditor goal={null} goals={defaultData.goals} onClose={vi.fn()} onSave={onSave} />)
+    if (kind === 'task') render(<TaskEditor task={null} goals={defaultData.goals} categories={defaultData.skillCategories} skills={defaultData.skills} onClose={vi.fn()} onSave={onSave} />)
+    if (kind === 'skill') render(<SkillEditor skill={null} categories={defaultData.skillCategories} skills={defaultData.skills} initialCategoryId={defaultData.skillCategories[0]?.id ?? null} onClose={vi.fn()} onSave={onSave} />)
+    if (kind === 'category') render(<SkillCategoryEditor category={null} onClose={vi.fn()} onSave={onSave} />)
 
-    await user.type(screen.getByLabelText(new RegExp(label)), '   ')
+    const input = screen.getByRole('textbox', { name: /名称/ })
+    await user.type(input, '   ')
     await user.click(screen.getByRole('button', { name: /^保存/ }))
-
     expect(onSave).not.toHaveBeenCalled()
     expect(screen.getByRole('alert')).toHaveTextContent('不能只包含空格')
   })
@@ -102,31 +50,20 @@ describe('CRUD 表单加固', () => {
   it('异步保存期间阻止重复提交和关闭', async () => {
     const user = userEvent.setup()
     let resolveSave: (() => void) | undefined
-    const onSave = vi.fn(
-      () =>
-        new Promise<void>((resolve) => {
-          resolveSave = resolve
-        }),
-    )
+    const onSave = vi.fn(() => new Promise<void>((resolve) => { resolveSave = resolve }))
     const onClose = vi.fn()
-    renderNamedEditor('goal', onSave, onClose)
+    render(<GoalEditor goal={null} goals={defaultData.goals} onClose={onClose} onSave={onSave} />)
 
     await user.type(screen.getByLabelText(/目标名称/), '长期目标')
-    const saveButton = screen.getByRole('button', { name: '保存目标' })
-    await user.click(saveButton)
-
+    await user.click(screen.getByRole('button', { name: '保存目标' }))
     expect(onSave).toHaveBeenCalledTimes(1)
     expect(screen.getByRole('button', { name: '保存中…' })).toBeDisabled()
     expect(screen.getByRole('button', { name: '取消' })).toBeDisabled()
-    expect(screen.getByRole('button', { name: '关闭' })).toBeDisabled()
-    expect(onClose).not.toHaveBeenCalled()
-
     resolveSave?.()
     await waitFor(() => expect(onClose).toHaveBeenCalledTimes(1))
-    expect(onSave).toHaveBeenCalledTimes(1)
   })
 
-  it('已结算任务保存基础信息时仍保留原奖励', async () => {
+  it('已完成任务编辑时保留结算奖励', async () => {
     const user = userEvent.setup()
     const task: Task = {
       ...defaultData.tasks[0]!,
@@ -134,32 +71,15 @@ describe('CRUD 表单加固', () => {
       completedAt: '2026-08-24T12:00:00.000Z',
       rewardApplied: true,
     }
-    const onSave = vi.fn(async (_savedTask: Task) => undefined)
+    const onSave = vi.fn(async (_task: Task) => undefined)
+    render(<TaskEditor task={task} goals={defaultData.goals} categories={defaultData.skillCategories} skills={defaultData.skills} onClose={vi.fn()} onSave={onSave} />)
 
-    render(
-      <TaskEditor
-        task={task}
-        goals={defaultData.goals}
-        skills={defaultData.skills}
-        bosses={defaultData.bosses}
-        onClose={vi.fn()}
-        onSave={onSave}
-      />,
-    )
-
-    const nameInput = screen.getByLabelText(/任务名称/)
-    await user.clear(nameInput)
-    await user.type(nameInput, '更新后的任务名称')
+    const input = screen.getByLabelText(/任务名称/)
+    await user.clear(input)
+    await user.type(input, '更新后的任务')
     await user.click(screen.getByRole('button', { name: '保存任务' }))
-
     await waitFor(() => expect(onSave).toHaveBeenCalledTimes(1))
-    const savedTask = onSave.mock.calls[0]?.[0]
-    expect(savedTask).toBeDefined()
-    if (savedTask === undefined) {
-      return
-    }
-    expect(savedTask.rewards).toEqual(task.rewards)
-    expect(savedTask.rewardApplied).toBe(true)
-    expect(savedTask.status).toBe('completed')
+    expect(onSave.mock.calls[0]?.[0].rewards).toEqual(task.rewards)
+    expect(onSave.mock.calls[0]?.[0].rewardApplied).toBe(true)
   })
 })

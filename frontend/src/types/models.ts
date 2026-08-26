@@ -70,11 +70,13 @@ export interface Skill extends EntityBase {
 }
 
 export type GoalStatus = 'planned' | 'active' | 'completed' | 'paused'
+export type GoalDisplayMode = 'standard' | 'boss'
 
 export interface Goal extends EntityBase {
   parentId: string | null
   name: string
   type: 'major' | 'minor'
+  displayMode: GoalDisplayMode
   description: string
   deadline: ISODateString | null
   status: GoalStatus
@@ -86,33 +88,37 @@ export interface SkillReward {
   amount: number
 }
 
-export interface BossReward {
-  bossId: string
-  damage: number
-}
-
+/** 自动计算后随任务保存的奖励快照，保证任务完成时结算结果稳定。 */
 export interface RewardBundle {
   exp: number
   stats: Partial<Record<StatKey, number>>
   skills: SkillReward[]
-  bosses: BossReward[]
+  goalProgress: number
 }
 
 export const EMPTY_REWARDS: RewardBundle = {
   exp: 0,
   stats: {},
   skills: [],
-  bosses: [],
+  goalProgress: 0,
 }
 
 export type TaskStatus = 'todo' | 'in_progress' | 'completed'
+export type TaskDifficulty = 'easy' | 'medium' | 'hard'
+
+export const TASK_DIFFICULTY_LABELS: Record<TaskDifficulty, string> = {
+  easy: '简单',
+  medium: '中等',
+  hard: '困难',
+}
 
 export interface Task extends EntityBase {
   goalId: string | null
+  categoryId: string | null
   name: string
-  type: string
   description: string
   dueDate: ISODateString | null
+  difficulty: TaskDifficulty
   status: TaskStatus
   rewards: RewardBundle
   completedAt: ISODateString | null
@@ -139,47 +145,15 @@ export interface Achievement extends EntityBase {
   trigger: AchievementTrigger | null
 }
 
-export type EquipmentQuality = 'common' | 'fine' | 'rare' | 'epic' | 'legendary'
+export type LifeEventSource = 'manual' | 'achievement' | 'goal' | 'stage'
 
-export interface Equipment extends EntityBase {
-  name: string
-  quality: EquipmentQuality
-  description: string
-  statBonuses: Partial<Record<StatKey, number>>
-}
-
+/** 成长足迹只保存重要节点，普通任务完成不会写入。 */
 export interface LifeEvent extends EntityBase {
   date: ISODateString
   title: string
   description: string
-  rewards: RewardBundle
-  sourceType: 'manual' | 'task' | 'achievement' | 'boss'
+  sourceType: LifeEventSource
   sourceId: string | null
-}
-
-export type BossStatus = 'planned' | 'active' | 'defeated'
-
-export interface Boss extends EntityBase {
-  goalId: string | null
-  name: string
-  description: string
-  maxHp: number
-  currentHp: number
-  deadline: ISODateString | null
-  status: BossStatus
-}
-
-export type TimelineStatus = 'past' | 'current' | 'future'
-
-export interface TimelineNode extends EntityBase {
-  parentId: string | null
-  title: string
-  description: string
-  stageType: string
-  status: TimelineStatus
-  startDate: ISODateString | null
-  endDate: ISODateString | null
-  order: number
 }
 
 export interface AppData {
@@ -190,10 +164,7 @@ export interface AppData {
   goals: Goal[]
   tasks: Task[]
   achievements: Achievement[]
-  equipment: Equipment[]
   events: LifeEvent[]
-  bosses: Boss[]
-  timeline: TimelineNode[]
 }
 
 export interface SaveFile extends AppData {
@@ -213,10 +184,7 @@ export const ENTITY_COLLECTIONS = [
   'goals',
   'tasks',
   'achievements',
-  'equipment',
   'events',
-  'bosses',
-  'timeline',
 ] as const
 
 export type EntityCollection = (typeof ENTITY_COLLECTIONS)[number]
@@ -227,8 +195,5 @@ export interface CollectionEntityMap {
   goals: Goal
   tasks: Task
   achievements: Achievement
-  equipment: Equipment
   events: LifeEvent
-  bosses: Boss
-  timeline: TimelineNode
 }

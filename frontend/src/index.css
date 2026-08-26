@@ -27,13 +27,6 @@
   --color-stat-execution: #a97c1f;
   --color-stat-health: #4a7a5e;
 
-  /* ── 装备品质 ─────────────────────────────────────── */
-  --color-quality-common: #8d8474;
-  --color-quality-fine: #4a7a5e;
-  --color-quality-rare: #4a6a8a;
-  --color-quality-epic: #6a5a8a;
-  --color-quality-legendary: #a97c1f;
-
   --font-sans: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
   --font-display: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
   --font-kai: "Kaiti SC", "STKaiti", "KaiTi", "楷体", serif;

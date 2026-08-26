@@ -73,7 +73,7 @@ export function AchievementEditor({
     <Modal
       open
       title={achievement ? '编辑成就' : '添加成就'}
-      description="自动解锁规则先保存为触发器配置，后续可接入自动检测。"
+      description="自动成就会在任务、目标、技能或连续天数达到阈值时解锁。"
       onClose={onClose}
     >
       <form className="space-y-4" onSubmit={handleSubmit}>
@@ -120,7 +120,7 @@ export function AchievementEditor({
               }}
             >
               <option value="manual">手动解锁</option>
-              <option value="automatic">自动解锁（预留）</option>
+              <option value="automatic">自动解锁</option>
             </select>
           </FormField>
           <FormField
@@ -146,7 +146,7 @@ export function AchievementEditor({
             <FormField
               label="事件标识"
               htmlFor="achievement-trigger-event"
-              hint="例如 task.completed；留空表示暂不配置自动规则。"
+              hint="支持 task.completed、goal.completed、skill.level、streak.days。"
             >
               <input
                 id="achievement-trigger-event"
