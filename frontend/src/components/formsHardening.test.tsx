@@ -11,7 +11,8 @@ import { SkillEditor } from './skills/SkillEditor'
 const defaultData = defaultDataJson as AppData
 
 describe('精简 CRUD 表单', () => {
-  it('任务默认只展示名称、分类、难度和可选日期，不暴露奖励输入', () => {
+  it('任务首屏只展示名称、分类、难度、紧凑奖励和更多选项', async () => {
+    const user = userEvent.setup()
     render(
       <TaskEditor
         task={null}
@@ -24,12 +25,42 @@ describe('精简 CRUD 表单', () => {
     )
 
     expect(screen.getByLabelText(/任务名称/)).toBeInTheDocument()
-    expect(screen.getByLabelText(/分类/)).toBeInTheDocument()
+    expect(screen.getByLabelText('分类')).toBeInTheDocument()
     expect(screen.getByLabelText('难度')).toBeInTheDocument()
-    expect(screen.getByLabelText(/截止日期/)).toBeInTheDocument()
+    expect(screen.getByLabelText(/截止日期/)).not.toBeVisible()
     expect(screen.queryByLabelText('角色 EXP')).not.toBeInTheDocument()
     expect(screen.queryByText('Boss 伤害')).not.toBeInTheDocument()
-    expect(screen.getByText('自动奖励预览')).toBeInTheDocument()
+    expect(screen.getByLabelText('自动奖励预览')).toHaveTextContent('自动奖励 · +')
+    expect(screen.getByRole('button', { name: '保存任务' })).toHaveAttribute('form')
+    expect(screen.queryByRole('button', { name: '取消' })).not.toBeInTheDocument()
+
+    await user.click(screen.getByText('更多选项'))
+    expect(screen.getByLabelText(/截止日期/)).toBeVisible()
+    expect(screen.getByLabelText('关联目标')).toBeVisible()
+    expect(screen.getByLabelText('备注')).toBeVisible()
+  })
+
+  it('根据任务关键词推荐分类，手动选择后不再覆盖', async () => {
+    const user = userEvent.setup()
+    render(
+      <TaskEditor
+        task={null}
+        goals={defaultData.goals}
+        categories={defaultData.skillCategories}
+        skills={defaultData.skills}
+        onClose={vi.fn()}
+        onSave={vi.fn()}
+      />,
+    )
+
+    const name = screen.getByLabelText(/任务名称/)
+    const category = screen.getByLabelText('分类')
+    await user.type(name, '英语阅读')
+    expect(category).toHaveValue('category-language')
+    await user.selectOptions(category, 'category-mathematics')
+    await user.clear(name)
+    await user.type(name, '复习 408 数据结构')
+    expect(category).toHaveValue('category-mathematics')
   })
 
   it.each(['goal', 'task', 'skill', 'category'] as const)('%s 名称只含空格时不保存', async (kind) => {

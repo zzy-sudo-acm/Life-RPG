@@ -6,6 +6,7 @@ import { evaluateAchievementTriggers } from '../systems/achievements'
 import { completeTaskRewards } from '../systems/progression'
 import { calculateTaskRewards } from '../systems/rewardRules'
 import { parseSaveFile } from '../systems/saveValidation'
+import { ENTITY_COLLECTIONS } from '../types/models'
 import type {
   AppData,
   Achievement,
@@ -228,6 +229,23 @@ function appDataFromSaveFile(saveFile: SaveFile): AppData {
   return data
 }
 
+function assertImportedIdsMatch(expected: AppData, actual: AppData): void {
+  if (expected.character.id !== actual.character.id || expected.stats.id !== actual.stats.id) {
+    throw new Error('导入回读校验失败：单例记录 ID 不一致')
+  }
+
+  for (const collection of ENTITY_COLLECTIONS) {
+    const expectedIds = expected[collection].map((item) => item.id).toSorted()
+    const actualIds = actual[collection].map((item) => item.id).toSorted()
+    if (
+      expectedIds.length !== actualIds.length ||
+      expectedIds.some((id, index) => id !== actualIds[index])
+    ) {
+      throw new Error(`导入回读校验失败：${collection} 集合 ID 不一致`)
+    }
+  }
+}
+
 export function AppStoreProvider({ children }: { children: ReactNode }) {
   const [data, setData] = useState<AppData | null>(null)
   const [settings, setSettings] = useState<LocalSettings>(() => loadSettings())
@@ -395,10 +413,12 @@ export function AppStoreProvider({ children }: { children: ReactNode }) {
     const run = mutationQueueRef.current.catch(() => undefined).then(() =>
       withDataWriteLock(async () => {
         await replaceAppData(importedData)
-        dataRef.current = importedData
+        const reloaded = await loadAppData()
+        assertImportedIdsMatch(importedData, reloaded)
+        dataRef.current = reloaded
         dataChannelRef.current?.postMessage('changed')
         if (mountedRef.current) {
-          setData(importedData)
+          setData(reloaded)
           setError(null)
         }
       }),

@@ -1,5 +1,5 @@
 import { ChevronDown, Sparkles } from 'lucide-react'
-import { useMemo, useState, type FormEvent } from 'react'
+import { useId, useMemo, useState, type FormEvent } from 'react'
 import { calculateTaskRewards } from '../../systems/rewardRules'
 import {
   EMPTY_REWARDS,
@@ -27,9 +27,30 @@ interface TaskEditorProps {
   onSave: (task: Task) => Promise<void>
 }
 
+const CATEGORY_RECOMMENDATIONS = [
+  { keywords: ['数学', '高数', '线代', '概率'], categoryNames: ['数学'] },
+  { keywords: ['英语', '单词', '阅读'], categoryNames: ['英语', '语言'] },
+  { keywords: ['408', '操作系统', '数据结构', '计算机网络'], categoryNames: ['计算机'] },
+  { keywords: ['跑步', '健身'], categoryNames: ['健康', '运动'] },
+] as const
+
+function recommendCategoryId(name: string, categories: SkillCategory[]): string | null {
+  const recommendation = CATEGORY_RECOMMENDATIONS.find(({ keywords }) =>
+    keywords.some((keyword) => name.includes(keyword)),
+  )
+  if (recommendation === undefined) return null
+
+  return categories.find((category) =>
+    recommendation.categoryNames.some((categoryName) => category.name.includes(categoryName)),
+  )?.id ?? null
+}
+
 export function TaskEditor({ task, goals, categories, skills, onClose, onSave }: TaskEditorProps) {
+  const formId = useId()
   const [nameError, setNameError] = useState<string | null>(null)
+  const [name, setName] = useState(task?.name ?? '')
   const [categoryId, setCategoryId] = useState(task?.categoryId ?? categories[0]?.id ?? '')
+  const [categoryManuallyChanged, setCategoryManuallyChanged] = useState(false)
   const [difficulty, setDifficulty] = useState<TaskDifficulty>(task?.difficulty ?? 'medium')
   const [goalId, setGoalId] = useState(task?.goalId ?? '')
   const { isSubmitting, submissionError, clearSubmissionError, runSubmission } = useAsyncSubmission()
@@ -79,8 +100,16 @@ export function TaskEditor({ task, goals, categories, skills, onClose, onSave }:
       description={task?.rewardApplied ? '已完成任务的奖励保持锁定。' : '只填日常需要的信息，奖励由系统自动计算。'}
       onClose={onClose}
       closeDisabled={isSubmitting}
+      footer={(
+        <div className="space-y-2">
+          {submissionError ? <p role="alert" className="text-sm text-danger">{submissionError}</p> : null}
+          <Button className="min-h-12 w-full" type="submit" form={formId} disabled={isSubmitting}>
+            {isSubmitting ? '保存中…' : '保存任务'}
+          </Button>
+        </div>
+      )}
     >
-      <form className="space-y-4" onSubmit={handleSubmit}>
+      <form id={formId} className="space-y-3" onSubmit={handleSubmit}>
         <FormField label="任务名称" htmlFor="task-name" required error={nameError}>
           <input
             id="task-name"
@@ -88,22 +117,31 @@ export function TaskEditor({ task, goals, categories, skills, onClose, onSave }:
             required
             autoFocus
             placeholder="例如：数学强化 2h"
-            defaultValue={task?.name ?? ''}
+            value={name}
             className={inputClassName}
-            onChange={() => {
+            onChange={(event) => {
+              const nextName = event.currentTarget.value
+              setName(nextName)
               setNameError(null)
               clearSubmissionError()
+              if (task === null && !categoryManuallyChanged) {
+                const recommendation = recommendCategoryId(nextName, categories)
+                if (recommendation !== null) setCategoryId(recommendation)
+              }
             }}
           />
         </FormField>
 
-        <div className="grid gap-3 sm:grid-cols-3">
-          <FormField label="分类 / 标签" htmlFor="task-category">
+        <div className="grid grid-cols-2 gap-3">
+          <FormField label="分类" htmlFor="task-category">
             <select
               id="task-category"
               value={categoryId}
               className={inputClassName}
-              onChange={(event) => setCategoryId(event.currentTarget.value)}
+              onChange={(event) => {
+                setCategoryId(event.currentTarget.value)
+                setCategoryManuallyChanged(true)
+              }}
             >
               <option value="">未分类</option>
               {categories.map((category) => <option key={category.id} value={category.id}>{category.name}</option>)}
@@ -121,21 +159,13 @@ export function TaskEditor({ task, goals, categories, skills, onClose, onSave }:
               )}
             </select>
           </FormField>
-          <FormField label="截止日期（可选）" htmlFor="task-due-date">
-            <input
-              id="task-due-date"
-              name="dueDate"
-              type="date"
-              defaultValue={task?.dueDate?.slice(0, 10) ?? ''}
-              className={inputClassName}
-            />
-          </FormField>
         </div>
 
         {!task?.rewardApplied ? (
-          <div className="rounded-xl border border-exp/25 bg-exp-soft px-4 py-3 text-sm text-muted">
-            <p className="flex items-center gap-2 font-medium text-exp"><Sparkles size={15} /> 自动奖励预览</p>
-            <p className="mt-1.5">
+          <div aria-label="自动奖励预览" className="flex min-h-10 items-center gap-2 rounded-lg border border-exp/20 bg-exp-soft px-3 py-2 text-xs text-muted">
+            <Sparkles size={14} className="shrink-0 text-exp" />
+            <p className="min-w-0 leading-5">
+              <span className="font-medium text-exp">自动奖励</span>{' · '}
               +{preview.exp} EXP
               {previewSkill ? ` · ${previewSkill.name} +${preview.skills[0]?.amount}` : ''}
               {previewStat ? ` · ${STAT_LABELS[previewStat]} +${preview.stats[previewStat]}` : ''}
@@ -144,12 +174,21 @@ export function TaskEditor({ task, goals, categories, skills, onClose, onSave }:
           </div>
         ) : null}
 
-        <details className="group rounded-xl border border-line bg-surface px-4 py-3">
-          <summary className="flex cursor-pointer list-none items-center justify-between text-sm font-medium text-ink">
+        <details className="group rounded-xl border border-line bg-surface px-3.5 py-3">
+          <summary className="flex min-h-5 cursor-pointer list-none items-center justify-between text-sm font-medium text-ink">
             更多选项
             <ChevronDown size={16} className="transition-transform group-open:rotate-180" />
           </summary>
-          <div className="mt-4 space-y-4 border-t border-line pt-4">
+          <div className="mt-3 space-y-3 border-t border-line pt-3">
+            <FormField label="截止日期" htmlFor="task-due-date">
+              <input
+                id="task-due-date"
+                name="dueDate"
+                type="date"
+                defaultValue={task?.dueDate?.slice(0, 10) ?? ''}
+                className={inputClassName}
+              />
+            </FormField>
             <FormField label="关联目标" htmlFor="task-goal">
               <select
                 id="task-goal"
@@ -163,7 +202,7 @@ export function TaskEditor({ task, goals, categories, skills, onClose, onSave }:
                 )}
               </select>
             </FormField>
-            <FormField label="描述" htmlFor="task-description">
+            <FormField label="备注" htmlFor="task-description">
               <textarea
                 id="task-description"
                 name="description"
@@ -173,12 +212,6 @@ export function TaskEditor({ task, goals, categories, skills, onClose, onSave }:
             </FormField>
           </div>
         </details>
-
-        {submissionError ? <p role="alert" className="text-sm text-danger">{submissionError}</p> : null}
-        <div className="flex flex-col-reverse gap-3 pt-2 sm:flex-row sm:justify-end">
-          <Button variant="secondary" onClick={onClose} disabled={isSubmitting}>取消</Button>
-          <Button type="submit" disabled={isSubmitting}>{isSubmitting ? '保存中…' : '保存任务'}</Button>
-        </div>
       </form>
     </Modal>
   )

@@ -5,7 +5,7 @@ import { SCHEMA_VERSION } from '../data/constants'
 import { loadAppData, resetDatabase } from '../data/database'
 import { loadSettings } from '../data/settings'
 import { validateSaveFile } from '../systems/saveValidation'
-import { EMPTY_REWARDS, type Task } from '../types/models'
+import { EMPTY_REWARDS, ENTITY_COLLECTIONS, type Goal, type Task } from '../types/models'
 import { AppStoreProvider } from './AppStore'
 import { useAppStore } from './AppStoreContext'
 
@@ -109,6 +109,60 @@ describe('AppStoreProvider', () => {
     expect(result.current.data?.character.name).toBe('导入角色')
     act(() => result.current.updateSettings({ sidebarCollapsed: true }))
     expect(loadSettings().sidebarCollapsed).toBe(true)
+  })
+
+  it('导入前校验失败不清空原数据，成功导入会移除所有额外实体并回读核对 ID', async () => {
+    const { result } = renderHook(() => useAppStore(), { wrapper })
+    await waitFor(() => expect(result.current.data).not.toBeNull())
+    const cleanSave = await result.current.createSaveFile()
+    const timestamp = '2026-08-27T08:00:00.000Z'
+    const goalTemplate = cleanSave.goals[0]!
+    const sentinelGoal: Goal = {
+      ...goalTemplate,
+      id: 'goal-browser-sentinel',
+      parentId: null,
+      name: '浏览器验证目标',
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    }
+    const taskTemplate = cleanSave.tasks[0]!
+    const sentinelTask: Task = {
+      ...taskTemplate,
+      id: 'task-browser-sentinel',
+      goalId: sentinelGoal.id,
+      name: '浏览器奖励验证任务',
+      status: 'todo',
+      completedAt: null,
+      rewardApplied: false,
+      createdAt: timestamp,
+      updatedAt: timestamp,
+    }
+
+    await act(async () => result.current.saveEntity('goals', sentinelGoal))
+    await act(async () => result.current.saveEntity('tasks', sentinelTask))
+
+    const invalidSave = structuredClone(cleanSave)
+    invalidSave.character.primaryGoalId = 'missing-goal'
+    await act(async () => {
+      await expect(result.current.importSaveFile(invalidSave)).rejects.toThrow(/primaryGoalId/)
+    })
+    expect((await loadAppData()).goals).toContainEqual(expect.objectContaining({ id: sentinelGoal.id }))
+
+    await act(async () => result.current.importSaveFile(cleanSave))
+    const reloaded = await loadAppData()
+    expect(reloaded.goals.some((goal) => goal.name === '浏览器验证目标')).toBe(false)
+    expect(reloaded.tasks.some((task) => task.name === '浏览器奖励验证任务')).toBe(false)
+    expect(result.current.data?.goals.some((goal) => goal.id === sentinelGoal.id)).toBe(false)
+    expect(result.current.data?.tasks.some((task) => task.id === sentinelTask.id)).toBe(false)
+    for (const collection of ENTITY_COLLECTIONS) {
+      expect(reloaded[collection].map((item) => item.id).toSorted()).toEqual(
+        cleanSave[collection].map((item) => item.id).toSorted(),
+      )
+    }
+    expect(reloaded.goals.some((goal) => goal.parentId === null)).toBe(true)
+    expect(reloaded.skillCategories.length).toBeGreaterThan(1)
+    expect(reloaded.skills.length).toBeGreaterThan(1)
+    expect(reloaded.events.length).toBeGreaterThan(0)
   })
 
   it('删除目标和技能时清理引用，导出仍通过严格校验', async () => {

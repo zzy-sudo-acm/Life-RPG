@@ -1,5 +1,6 @@
 import { X } from 'lucide-react'
 import { useEffect, type ReactNode } from 'react'
+import { createPortal } from 'react-dom'
 
 interface ModalProps {
   open: boolean
@@ -8,6 +9,7 @@ interface ModalProps {
   onClose: () => void
   closeDisabled?: boolean
   children: ReactNode
+  footer?: ReactNode
   wide?: boolean
 }
 
@@ -18,22 +20,28 @@ export function Modal({
   onClose,
   closeDisabled = false,
   children,
+  footer,
   wide,
 }: ModalProps) {
   useEffect(() => {
     if (!open) return undefined
+    const previousOverflow = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === 'Escape' && !closeDisabled) onClose()
     }
     window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
+    return () => {
+      document.body.style.overflow = previousOverflow
+      window.removeEventListener('keydown', onKeyDown)
+    }
   }, [closeDisabled, onClose, open])
 
   if (!open) return null
 
-  return (
+  return createPortal(
     <div
-      className="fixed inset-0 z-50 flex items-end justify-center bg-ink/45 p-0 sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex h-[100dvh] items-end justify-center bg-ink/45 p-0 sm:items-center sm:p-6"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !closeDisabled) onClose()
@@ -43,9 +51,9 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
-        className={`max-h-[92vh] w-full animate-pop-in overflow-y-auto rounded-t-2xl border border-line bg-surface shadow-[0_24px_70px_rgb(44_38_32/0.35)] sm:rounded-xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
+        className={`flex max-h-[100dvh] w-full animate-pop-in flex-col overflow-hidden rounded-t-2xl border border-line bg-surface shadow-[0_24px_70px_rgb(44_38_32/0.35)] sm:max-h-[92dvh] sm:rounded-xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
       >
-        <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-surface/95 px-5 py-4">
+        <header className="z-10 flex shrink-0 items-start justify-between gap-4 border-b border-line bg-surface/95 px-4 py-3.5 sm:px-5 sm:py-4">
           <div>
             <h2 id="dialog-title" className="font-display text-lg font-bold text-ink">
               {title}
@@ -62,8 +70,16 @@ export function Modal({
             <X size={18} />
           </button>
         </header>
-        <div className="p-5">{children}</div>
+        <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain p-4 sm:p-5">
+          {children}
+        </div>
+        {footer ? (
+          <footer className="z-10 shrink-0 border-t border-line bg-surface/98 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 sm:px-5 sm:pb-4">
+            {footer}
+          </footer>
+        ) : null}
       </section>
-    </div>
+    </div>,
+    document.body,
   )
 }

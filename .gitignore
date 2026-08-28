@@ -8,3 +8,12 @@ frontend/*.local
 frontend/src/assets/hero.png
 docs/design/
 npm-debug.log*
+
+# Local/private Life RPG saves
+life_rpg_save*.json
+life_rpg_personal*.json
+life-rpg-save*.json
+life-rpg-backup*.json
+*.life-rpg.json
+private-saves/
+local-saves/
