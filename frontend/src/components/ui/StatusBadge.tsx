@@ -1,5 +1,3 @@
-import { cn } from '../../utils/cn'
-
 const labels: Record<string, string> = {
   planned: '计划中',
   active: '进行中',
@@ -19,28 +17,8 @@ interface StatusBadgeProps {
 }
 
 export function StatusBadge({ value }: StatusBadgeProps) {
-  const positive = value === 'completed' || value === 'defeated' || value === 'past'
-  const active = value === 'active' || value === 'in_progress' || value === 'current'
-  const golden = value === 'automatic'
   return (
-    <span
-      className={cn(
-        'inline-flex items-center gap-1.5 rounded border px-2 py-0.5 text-xs font-medium',
-        positive && 'border-primary/40 bg-primary-soft text-primary-deep',
-        active && 'border-info/40 bg-info-soft text-info',
-        golden && 'border-exp/40 bg-exp-soft text-exp',
-        !positive && !active && !golden && 'border-line bg-ink/4 text-muted',
-      )}
-    >
-      <span
-        className={cn(
-          'size-1.5',
-          positive && 'bg-primary',
-          active && 'bg-info',
-          golden && 'bg-exp',
-          !positive && !active && !golden && 'bg-faint',
-        )}
-      />
+    <span className="inline-flex items-center rounded-full bg-ink/5 px-2.5 py-0.5 text-xs text-muted">
       {labels[value] ?? value}
     </span>
   )

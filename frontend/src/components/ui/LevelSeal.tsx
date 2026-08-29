@@ -12,18 +12,18 @@ const sizes = {
   lg: 'size-14 text-xl',
 } as const
 
-/** 朱文印风格的等级印章：旋转方印，印泥质感。 */
+/** 等级徽标：深色圆角方块，像一枚克制的 app 图标。 */
 export function LevelSeal({ level, size = 'md', className }: LevelSealProps) {
   return (
     <span
       className={cn(
-        'seal flex shrink-0 select-none flex-col items-center justify-center rounded-[6px] font-bold leading-none',
+        'flex shrink-0 select-none flex-col items-center justify-center rounded-[26%] bg-ink font-bold leading-none text-white',
         sizes[size],
         className,
       )}
       aria-label={`等级 ${level}`}
     >
-      <span className="text-[8px] font-medium tracking-widest opacity-80">LV</span>
+      <span className="text-[8px] font-medium tracking-widest opacity-60">LV</span>
       <span className="tabular-nums">{level}</span>
     </span>
   )

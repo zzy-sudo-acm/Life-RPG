@@ -35,6 +35,6 @@ export function FormField({
 }
 
 export const inputClassName =
-  'min-h-11 w-full rounded-lg border border-line bg-canvas/60 px-3 text-sm text-ink outline-none transition-colors placeholder:text-faint focus:border-primary/60 focus:ring-2 focus:ring-primary/15 disabled:bg-ink/5 disabled:text-muted'
+  'min-h-11 w-full rounded-xl border border-transparent bg-ink/[0.045] px-3 text-sm text-ink outline-none transition-colors placeholder:text-faint focus:border-primary/50 focus:bg-surface focus:ring-4 focus:ring-primary/10 disabled:opacity-50'
 
 export const textareaClassName = `${inputClassName} min-h-24 resize-y py-2.5`

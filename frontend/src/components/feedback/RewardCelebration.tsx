@@ -1,18 +1,16 @@
-import { Flag, Sparkles, TrendingUp, Trophy, Zap } from 'lucide-react'
+import { Check, Flag, Sparkles, TrendingUp, Trophy, Zap } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { useAppStore } from '../../store/AppStoreContext'
 import { STAT_KEYS, STAT_LABELS } from '../../types/models'
 import { formatNumber } from '../../utils/format'
 import type { Celebration } from './useRewardCelebration'
 
-const PARTICLES = ['✦', '❋', '✧', '✦', '❋', '✧', '✦', '❋']
-
 interface RewardCelebrationProps {
   celebration: Celebration | null
   onClose: () => void
 }
 
-/** 任务结算后的庆祝浮层：朱红「成」字印盖下，列出全部收获。 */
+/** 任务结算后的轻量反馈浮层：一个干净的白卡片，列出全部收获。 */
 export function RewardCelebration({ celebration, onClose }: RewardCelebrationProps) {
   const { data } = useAppStore()
 
@@ -26,38 +24,22 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
     if (celebration === null || data === null) return []
     const { rewards } = celebration
     const skillNames = new Map(data.skills.map((skill) => [skill.id, skill.name]))
-    const lines: Array<{ icon: typeof Zap; text: string; className: string }> = []
+    const lines: Array<{ icon: typeof Zap; text: string }> = []
 
     if (rewards.exp > 0) {
-      lines.push({
-        icon: Zap,
-        text: `EXP +${formatNumber(rewards.exp)}`,
-        className: 'border-exp/45 bg-exp-soft text-exp',
-      })
+      lines.push({ icon: Zap, text: `EXP +${formatNumber(rewards.exp)}` })
     }
     for (const key of STAT_KEYS) {
       const amount = rewards.stats[key] ?? 0
       if (amount > 0) {
-        lines.push({
-          icon: TrendingUp,
-          text: `${STAT_LABELS[key]} +${amount}`,
-          className: 'border-primary/40 bg-primary-soft text-primary-deep',
-        })
+        lines.push({ icon: TrendingUp, text: `${STAT_LABELS[key]} +${amount}` })
       }
     }
     for (const reward of rewards.skills) {
-      lines.push({
-        icon: Sparkles,
-        text: `${skillNames.get(reward.skillId) ?? '技能'} 经验 +${reward.amount}`,
-        className: 'border-info/40 bg-info-soft text-info',
-      })
+      lines.push({ icon: Sparkles, text: `${skillNames.get(reward.skillId) ?? '技能'} 经验 +${reward.amount}` })
     }
     if (rewards.goalProgress > 0) {
-      lines.push({
-        icon: Flag,
-        text: `目标进度 +${rewards.goalProgress}%`,
-        className: 'border-danger/40 bg-danger-soft text-danger',
-      })
+      lines.push({ icon: Flag, text: `目标进度 +${rewards.goalProgress}%` })
     }
     return lines
   }, [celebration, data])
@@ -68,7 +50,7 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
 
   return (
     <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-ink/50 p-6"
+      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-6"
       role="alertdialog"
       aria-modal="true"
       aria-label="任务完成奖励"
@@ -76,35 +58,16 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
         if (event.target === event.currentTarget) onClose()
       }}
     >
-      {/* 漂浮墨点 */}
-      <div aria-hidden className="pointer-events-none absolute inset-0 overflow-hidden">
-        {PARTICLES.map((text, index) => (
-          <span
-            key={`${text}-${index}`}
-            className="absolute bottom-[28%] animate-float-up text-sm text-exp"
-            style={{
-              left: `${12 + index * 10}%`,
-              animationDelay: `${index * 0.14}s`,
-            }}
-          >
-            {text}
-          </span>
-        ))}
-      </div>
+      <div className="w-full max-w-sm animate-pop-in rounded-2xl bg-surface p-6 text-center shadow-[0_24px_70px_rgb(0_0_0/0.25)]">
+        <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-primary text-white">
+          <Check size={28} strokeWidth={2.5} />
+        </span>
 
-      <div className="relative w-full max-w-sm animate-pop-in rounded-xl border border-[#c6b898] bg-surface p-6 text-center shadow-[0_24px_70px_rgb(44_38_32/0.4)]">
-        {/* 朱红「成」字印，盖下来 */}
-        <div className="relative mx-auto w-fit animate-stamp">
-          <span className="seal flex size-20 items-center justify-center rounded-xl font-display text-4xl font-bold">
-            成
-          </span>
-        </div>
-
-        <h2 className="mt-4 font-display text-xl font-bold text-ink">任务完成</h2>
-        <p className="mt-1 truncate font-kai text-sm text-muted">{celebration.title}</p>
+        <h2 className="mt-4 text-lg font-semibold tracking-tight text-ink">任务完成</h2>
+        <p className="mt-1 truncate text-sm text-muted">{celebration.title}</p>
 
         {leveledUp ? (
-          <p className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-lg border border-exp/50 bg-exp-soft px-4 py-1.5 font-display text-sm font-bold tracking-wide text-exp">
+          <p className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-full bg-primary-soft px-4 py-1.5 text-sm font-semibold text-primary">
             <Trophy size={16} />
             升级！Lv.{celebration.baseLevel} → Lv.{data.character.level}
           </p>
@@ -112,23 +75,23 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
 
         {rewardLines.length > 0 ? (
           <ul className="mt-5 flex flex-wrap justify-center gap-2">
-            {rewardLines.map(({ icon: Icon, text, className }) => (
+            {rewardLines.map(({ icon: Icon, text }) => (
               <li
                 key={text}
-                className={`flex items-center gap-1.5 rounded-lg border px-3 py-1.5 text-sm font-semibold ${className}`}
+                className="flex items-center gap-1.5 rounded-full bg-ink/[0.05] px-3 py-1.5 text-sm font-medium text-ink"
               >
-                <Icon size={14} />
+                <Icon size={14} className="text-muted" />
                 {text}
               </li>
             ))}
           </ul>
         ) : (
-          <p className="mt-5 font-kai text-sm text-muted">奖励已自动结算</p>
+          <p className="mt-5 text-sm text-muted">奖励已自动结算</p>
         )}
 
         <button
           type="button"
-          className="mt-6 min-h-11 w-full rounded-lg border border-[#8a6316] bg-exp text-sm font-bold text-[#fdf8ec] shadow-[0_2px_0_rgb(122_88_16/0.9)] transition-all hover:bg-[#96690f] active:translate-y-px active:shadow-none"
+          className="mt-6 min-h-11 w-full rounded-full bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-deep active:opacity-80"
           onClick={onClose}
         >
           收下奖励

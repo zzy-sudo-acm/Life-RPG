@@ -162,10 +162,10 @@ export function TaskEditor({ task, goals, categories, skills, onClose, onSave }:
         </div>
 
         {!task?.rewardApplied ? (
-          <div aria-label="自动奖励预览" className="flex min-h-10 items-center gap-2 rounded-lg border border-exp/20 bg-exp-soft px-3 py-2 text-xs text-muted">
-            <Sparkles size={14} className="shrink-0 text-exp" />
+          <div aria-label="自动奖励预览" className="flex min-h-10 items-center gap-2 rounded-xl bg-ink/[0.04] px-3 py-2 text-xs text-muted">
+            <Sparkles size={14} className="shrink-0 text-primary" />
             <p className="min-w-0 leading-5">
-              <span className="font-medium text-exp">自动奖励</span>{' · '}
+              <span className="font-medium text-ink">自动奖励</span>{' · '}
               +{preview.exp} EXP
               {previewSkill ? ` · ${previewSkill.name} +${preview.skills[0]?.amount}` : ''}
               {previewStat ? ` · ${STAT_LABELS[previewStat]} +${preview.stats[previewStat]}` : ''}
@@ -174,7 +174,7 @@ export function TaskEditor({ task, goals, categories, skills, onClose, onSave }:
           </div>
         ) : null}
 
-        <details className="group rounded-xl border border-line bg-surface px-3.5 py-3">
+        <details className="group rounded-xl bg-ink/[0.04] px-3.5 py-3">
           <summary className="flex min-h-5 cursor-pointer list-none items-center justify-between text-sm font-medium text-ink">
             更多选项
             <ChevronDown size={16} className="transition-transform group-open:rotate-180" />

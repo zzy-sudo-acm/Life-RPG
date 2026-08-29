@@ -41,7 +41,7 @@ export function Modal({
 
   return createPortal(
     <div
-      className="fixed inset-0 z-50 flex h-[100dvh] items-end justify-center bg-ink/45 p-0 sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex h-[100dvh] items-end justify-center bg-black/40 p-0 sm:items-center sm:p-6"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !closeDisabled) onClose()
@@ -51,11 +51,11 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
-        className={`flex max-h-[100dvh] w-full animate-pop-in flex-col overflow-hidden rounded-t-2xl border border-line bg-surface shadow-[0_24px_70px_rgb(44_38_32/0.35)] sm:max-h-[92dvh] sm:rounded-xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
+        className={`flex max-h-[100dvh] w-full animate-pop-in flex-col overflow-hidden rounded-t-3xl bg-surface shadow-[0_24px_70px_rgb(0_0_0/0.25)] sm:max-h-[92dvh] sm:rounded-2xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
       >
-        <header className="z-10 flex shrink-0 items-start justify-between gap-4 border-b border-line bg-surface/95 px-4 py-3.5 sm:px-5 sm:py-4">
+        <header className="z-10 flex shrink-0 items-start justify-between gap-4 border-b border-line px-4 py-3.5 sm:px-5 sm:py-4">
           <div>
-            <h2 id="dialog-title" className="font-display text-lg font-bold text-ink">
+            <h2 id="dialog-title" className="text-lg font-semibold text-ink">
               {title}
             </h2>
             {description ? <p className="mt-1 text-sm text-muted">{description}</p> : null}
@@ -74,7 +74,7 @@ export function Modal({
           {children}
         </div>
         {footer ? (
-          <footer className="z-10 shrink-0 border-t border-line bg-surface/98 px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 sm:px-5 sm:pb-4">
+          <footer className="z-10 shrink-0 border-t border-line px-4 pb-[max(1rem,env(safe-area-inset-bottom))] pt-3 sm:px-5 sm:pb-4">
             {footer}
           </footer>
         ) : null}

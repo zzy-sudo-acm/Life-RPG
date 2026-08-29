@@ -1,50 +1,31 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── 冒险手账 · 纸与墨 ────────────────────────────── */
-  --color-canvas: #f2ecdf;
-  --color-surface: #fbf7ee;
-  --color-raised: #ece4d1;
-  --color-sidebar: #26211b;
-  --color-ink: #2c2620;
-  --color-muted: #6f6455;
-  --color-faint: #9a8d7a;
-  --color-line: #d9cdb2;
-  --color-primary: #3f6f52;
-  --color-primary-deep: #2f5540;
-  --color-primary-soft: rgb(63 111 82 / 0.1);
-  --color-exp: #a97c1f;
-  --color-exp-soft: rgb(169 124 31 / 0.12);
-  --color-danger: #bd4229;
-  --color-danger-soft: rgb(189 66 41 / 0.1);
-  --color-info: #4a6a8a;
-  --color-info-soft: rgb(74 106 138 / 0.1);
+  /* ── 极简浅色 · Apple 风 ───────────────────────────── */
+  --color-canvas: #f5f5f7;
+  --color-surface: #ffffff;
+  --color-raised: #e8e8ed;
+  --color-ink: #1d1d1f;
+  --color-muted: #6e6e73;
+  --color-faint: #86868b;
+  --color-line: rgb(0 0 0 / 0.08);
+  --color-primary: #0071e3;
+  --color-primary-deep: #0077ed;
+  --color-primary-soft: rgb(0 113 227 / 0.1);
+  --color-danger: #ff3b30;
+  --color-danger-soft: rgb(255 59 48 / 0.1);
 
-  /* ── 五维属性（与纸面协调的沉稳色） ────────────────── */
-  --color-stat-technical: #4a6a8a;
-  --color-stat-intelligence: #6a5a8a;
-  --color-stat-creativity: #b5644a;
-  --color-stat-execution: #a97c1f;
-  --color-stat-health: #4a7a5e;
+  --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro SC", "SF Pro Text", "PingFang SC", "Helvetica Neue", "Microsoft YaHei", system-ui, sans-serif;
 
-  --font-sans: "PingFang SC", "Microsoft YaHei", system-ui, sans-serif;
-  --font-display: "Songti SC", "STSong", "Noto Serif SC", "Source Han Serif SC", "SimSun", serif;
-  --font-kai: "Kaiti SC", "STKaiti", "KaiTi", "楷体", serif;
-
-  /* ── 动效 ─────────────────────────────────────────── */
-  --animate-fade-up: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both;
-  --animate-pop-in: pop-in 0.35s cubic-bezier(0.34, 1.4, 0.64, 1) both;
-  --animate-stamp: stamp 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) 0.15s both;
-  --animate-float-up: float-up 1.6s ease-out both;
-  --animate-shine: shine 3.2s ease-in-out infinite;
-  --animate-pulse-ring: pulse-ring 2.4s ease-out infinite;
-  --animate-glow: glow 3.2s ease-in-out infinite;
+  /* ── 动效：只保留一次性的入场 ─────────────────────── */
+  --animate-fade-up: fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
+  --animate-pop-in: pop-in 0.3s cubic-bezier(0.34, 1.2, 0.64, 1) both;
 }
 
 @keyframes fade-up {
   from {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(10px);
   }
   to {
     opacity: 1;
@@ -55,69 +36,11 @@
 @keyframes pop-in {
   from {
     opacity: 0;
-    transform: scale(0.95) translateY(8px);
+    transform: scale(0.97) translateY(6px);
   }
   to {
     opacity: 1;
     transform: scale(1) translateY(0);
-  }
-}
-
-/* 印章落下：略放大后砸到位，带一点旋转 */
-@keyframes stamp {
-  from {
-    opacity: 0;
-    transform: scale(1.6) rotate(-14deg);
-  }
-  to {
-    opacity: 1;
-    transform: scale(1) rotate(-8deg);
-  }
-}
-
-@keyframes float-up {
-  0% {
-    opacity: 0;
-    transform: translateY(6px) scale(0.9);
-  }
-  18% {
-    opacity: 1;
-    transform: translateY(0) scale(1.04);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(-44px) scale(1);
-  }
-}
-
-@keyframes shine {
-  0%,
-  100% {
-    opacity: 0.35;
-  }
-  50% {
-    opacity: 0.9;
-  }
-}
-
-@keyframes pulse-ring {
-  0% {
-    opacity: 0.55;
-    transform: scale(1);
-  }
-  100% {
-    opacity: 0;
-    transform: scale(1.8);
-  }
-}
-
-@keyframes glow {
-  0%,
-  100% {
-    opacity: 0.6;
-  }
-  50% {
-    opacity: 1;
   }
 }
 
@@ -145,8 +68,6 @@ body {
   min-height: 100vh;
   margin: 0;
   background-color: var(--color-canvas);
-  /* 纸面噪点纹理（内联 SVG，无外部资源，离线可用） */
-  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0.17 0 0 0 0 0.14 0 0 0 0 0.10 0 0 0 0.04 0'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
 }
 
 button,
@@ -172,14 +93,14 @@ input[type='checkbox']:not(:disabled) {
 }
 
 ::selection {
-  color: #fbf7ee;
-  background: var(--color-danger);
+  color: #ffffff;
+  background: var(--color-primary);
 }
 
-/* 纸感细滚动条 */
+/* 纤细的中性滚动条 */
 * {
   scrollbar-width: thin;
-  scrollbar-color: #c4b697 transparent;
+  scrollbar-color: rgb(0 0 0 / 0.22) transparent;
 }
 *::-webkit-scrollbar {
   width: 8px;
@@ -187,7 +108,7 @@ input[type='checkbox']:not(:disabled) {
 }
 *::-webkit-scrollbar-thumb {
   border-radius: 8px;
-  background: #c4b697;
+  background: rgb(0 0 0 / 0.18);
 }
 *::-webkit-scrollbar-track {
   background: transparent;
@@ -207,18 +128,6 @@ input[type='number'] {
 /* 页面切换入场动画（AppShell 通过 key 重新挂载 main） */
 .page-enter {
   animation: var(--animate-fade-up);
-}
-
-/* 朱文印：等级与成就的盖章造型 */
-.seal {
-  font-family: var(--font-display);
-  color: #fbf7ee;
-  background: var(--color-danger);
-  border: 1.5px solid rgb(251 247 238 / 0.55);
-  box-shadow:
-    inset 0 0 0 1px rgb(140 40 22 / 0.35),
-    0 2px 6px rgb(44 38 32 / 0.25);
-  transform: rotate(-4deg);
 }
 
 @media (prefers-reduced-motion: reduce) {
