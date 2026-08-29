@@ -73,7 +73,7 @@ export function AppShell() {
         </div>
       </aside>
 
-      <main key={location.pathname} className="min-w-0 flex-1 px-4 pb-28 pt-5 sm:px-6 sm:pt-7 lg:px-8 lg:pb-12 lg:pt-8 xl:px-10">
+      <main key={location.pathname} className="min-w-0 flex-1 px-4 pb-44 pt-5 sm:px-6 sm:pt-7 lg:px-8 lg:pb-12 lg:pt-8 xl:px-10">
         <div className="page-enter mx-auto max-w-[1180px]">
           {error ? <p role="alert" className="mb-5 rounded-xl bg-danger-soft px-4 py-3 text-sm text-danger">{error}</p> : null}
           <Outlet />

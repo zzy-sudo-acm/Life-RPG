@@ -52,7 +52,7 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
   const leveledUp = data.character.level > celebration.baseLevel
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-[60] flex justify-center px-4 lg:bottom-8">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(132px+env(safe-area-inset-bottom))] z-[60] flex justify-center px-4 lg:bottom-8">
       <div
         role="status"
         className="pointer-events-auto w-full max-w-md animate-pop-in rounded-2xl bg-surface p-4 shadow-[0_12px_40px_rgb(0_0_0/0.16)] ring-1 ring-ink/5"
