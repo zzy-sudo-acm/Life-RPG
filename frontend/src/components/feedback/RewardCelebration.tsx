@@ -1,4 +1,4 @@
-import { Check, Flag, Sparkles, TrendingUp, Trophy, Zap } from 'lucide-react'
+import { Check, Flag, Sparkles, TrendingUp, Trophy, X, Zap } from 'lucide-react'
 import { useEffect, useMemo } from 'react'
 import { useAppStore } from '../../store/AppStoreContext'
 import { STAT_KEYS, STAT_LABELS } from '../../types/models'
@@ -10,13 +10,16 @@ interface RewardCelebrationProps {
   onClose: () => void
 }
 
-/** 任务结算后的轻量反馈浮层：一个干净的白卡片，列出全部收获。 */
+/**
+ * 任务结算后的轻量 toast：浮在底部导航之上，不遮挡页面、不打断连续操作，
+ * 片刻后自动消失，点按任意位置可立即关闭。
+ */
 export function RewardCelebration({ celebration, onClose }: RewardCelebrationProps) {
   const { data } = useAppStore()
 
   useEffect(() => {
     if (celebration === null) return undefined
-    const timer = window.setTimeout(onClose, 4200)
+    const timer = window.setTimeout(onClose, 3600)
     return () => window.clearTimeout(timer)
   }, [celebration, onClose])
 
@@ -49,53 +52,47 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
   const leveledUp = data.character.level > celebration.baseLevel
 
   return (
-    <div
-      className="fixed inset-0 z-[60] flex items-center justify-center bg-black/40 p-6"
-      role="alertdialog"
-      aria-modal="true"
-      aria-label="任务完成奖励"
-      onMouseDown={(event) => {
-        if (event.target === event.currentTarget) onClose()
-      }}
-    >
-      <div className="w-full max-w-sm animate-pop-in rounded-2xl bg-surface p-6 text-center shadow-[0_24px_70px_rgb(0_0_0/0.25)]">
-        <span className="mx-auto flex size-14 items-center justify-center rounded-full bg-primary text-white">
-          <Check size={28} strokeWidth={2.5} />
-        </span>
-
-        <h2 className="mt-4 text-lg font-semibold tracking-tight text-ink">任务完成</h2>
-        <p className="mt-1 truncate text-sm text-muted">{celebration.title}</p>
-
-        {leveledUp ? (
-          <p className="mx-auto mt-4 flex w-fit items-center gap-2 rounded-full bg-primary-soft px-4 py-1.5 text-sm font-semibold text-primary">
-            <Trophy size={16} />
-            升级！Lv.{celebration.baseLevel} → Lv.{data.character.level}
-          </p>
-        ) : null}
-
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(72px+env(safe-area-inset-bottom))] z-[60] flex justify-center px-4 lg:bottom-8">
+      <div
+        role="status"
+        className="pointer-events-auto w-full max-w-md animate-pop-in rounded-2xl bg-surface p-4 shadow-[0_12px_40px_rgb(0_0_0/0.16)] ring-1 ring-ink/5"
+      >
+        <div className="flex items-center gap-3">
+          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-white">
+            <Check size={18} strokeWidth={3} />
+          </span>
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-ink">任务完成</p>
+            <p className="truncate text-xs text-muted">{celebration.title}</p>
+          </div>
+          {leveledUp ? (
+            <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">
+              <Trophy size={13} />
+              Lv.{celebration.baseLevel} → {data.character.level}
+            </span>
+          ) : null}
+          <button
+            type="button"
+            aria-label="关闭奖励提示"
+            className="shrink-0 rounded-full p-1.5 text-faint transition-colors hover:bg-ink/5 hover:text-ink"
+            onClick={onClose}
+          >
+            <X size={16} />
+          </button>
+        </div>
         {rewardLines.length > 0 ? (
-          <ul className="mt-5 flex flex-wrap justify-center gap-2">
+          <ul className="mt-3 flex flex-wrap gap-1.5">
             {rewardLines.map(({ icon: Icon, text }) => (
               <li
                 key={text}
-                className="flex items-center gap-1.5 rounded-full bg-ink/[0.05] px-3 py-1.5 text-sm font-medium text-ink"
+                className="flex items-center gap-1 rounded-full bg-ink/[0.05] px-2.5 py-1 text-xs font-medium text-ink"
               >
-                <Icon size={14} className="text-muted" />
+                <Icon size={12} className="text-muted" />
                 {text}
               </li>
             ))}
           </ul>
-        ) : (
-          <p className="mt-5 text-sm text-muted">奖励已自动结算</p>
-        )}
-
-        <button
-          type="button"
-          className="mt-6 min-h-11 w-full rounded-full bg-primary text-sm font-semibold text-white transition-colors hover:bg-primary-deep active:opacity-80"
-          onClick={onClose}
-        >
-          收下奖励
-        </button>
+        ) : null}
       </div>
     </div>
   )

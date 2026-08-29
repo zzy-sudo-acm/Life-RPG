@@ -1,5 +1,5 @@
 import { X } from 'lucide-react'
-import { useEffect, type ReactNode } from 'react'
+import { useEffect, useRef, type ReactNode } from 'react'
 import { createPortal } from 'react-dom'
 
 interface ModalProps {
@@ -23,6 +23,8 @@ export function Modal({
   footer,
   wide,
 }: ModalProps) {
+  const overlayRef = useRef<HTMLDivElement>(null)
+
   useEffect(() => {
     if (!open) return undefined
     const previousOverflow = document.body.style.overflow
@@ -37,10 +39,30 @@ export function Modal({
     }
   }, [closeDisabled, onClose, open])
 
+  // 移动端软键盘弹出时，把遮罩层钉在可视区域内，避免弹窗被键盘遮挡。
+  useEffect(() => {
+    if (!open) return undefined
+    const viewport = window.visualViewport
+    const overlay = overlayRef.current
+    if (!viewport || !overlay) return undefined
+    const pin = () => {
+      overlay.style.height = `${viewport.height}px`
+      overlay.style.transform = `translateY(${viewport.offsetTop}px)`
+    }
+    pin()
+    viewport.addEventListener('resize', pin)
+    viewport.addEventListener('scroll', pin)
+    return () => {
+      viewport.removeEventListener('resize', pin)
+      viewport.removeEventListener('scroll', pin)
+    }
+  }, [open])
+
   if (!open) return null
 
   return createPortal(
     <div
+      ref={overlayRef}
       className="fixed inset-0 z-50 flex h-[100dvh] items-end justify-center bg-black/40 p-0 sm:items-center sm:p-6"
       role="presentation"
       onMouseDown={(event) => {
@@ -51,7 +73,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
-        className={`flex max-h-[100dvh] w-full animate-pop-in flex-col overflow-hidden rounded-t-3xl bg-surface shadow-[0_24px_70px_rgb(0_0_0/0.25)] sm:max-h-[92dvh] sm:rounded-2xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
+        className={`flex max-h-full w-full animate-pop-in flex-col overflow-hidden rounded-t-3xl bg-surface shadow-[0_24px_70px_rgb(0_0_0/0.25)] sm:max-h-[92dvh] sm:rounded-2xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
       >
         <header className="z-10 flex shrink-0 items-start justify-between gap-4 border-b border-line px-4 py-3.5 sm:px-5 sm:py-4">
           <div>

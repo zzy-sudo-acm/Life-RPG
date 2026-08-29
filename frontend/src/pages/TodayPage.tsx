@@ -108,13 +108,14 @@ export function TodayPage() {
       <div className="grid gap-6 lg:grid-cols-[minmax(0,1.55fr)_minmax(300px,0.85fr)] lg:items-start">
         <div className="space-y-6">
           <section>
-            <h2 className="text-3xl font-semibold tracking-tight text-ink sm:text-4xl">今天，继续前进</h2>
-            <form className="mt-5 rounded-2xl bg-surface p-2 shadow-[0_1px_4px_rgb(0_0_0/0.04)]" onSubmit={handleQuickAdd}>
+            <h2 className="text-2xl font-semibold tracking-tight text-ink sm:text-3xl">今天，继续前进</h2>
+            <form className="mt-4 rounded-2xl bg-surface p-2 shadow-[0_1px_4px_rgb(0_0_0/0.04)]" onSubmit={handleQuickAdd}>
               <div className="flex gap-2">
                 <input
                   value={quickName}
                   onChange={(event) => setQuickName(event.currentTarget.value)}
                   aria-label="快速添加任务"
+                  enterKeyHint="done"
                   placeholder="添加今天要做的事…"
                   className="min-h-12 min-w-0 flex-1 rounded-xl bg-transparent px-3 text-base text-ink outline-none placeholder:text-faint focus:bg-primary-soft/40"
                 />
