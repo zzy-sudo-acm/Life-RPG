@@ -1,3 +1,15 @@
+const tones: Record<string, string> = {
+  active: 'bg-primary-soft text-primary',
+  current: 'bg-primary-soft text-primary',
+  in_progress: 'bg-primary-soft text-primary',
+  completed: 'bg-verdant/10 text-verdant',
+  past: 'bg-verdant/10 text-verdant',
+  defeated: 'bg-verdant/10 text-verdant',
+  planned: 'bg-arcane-soft text-arcane',
+  paused: 'bg-white/8 text-muted',
+  todo: 'bg-white/8 text-muted',
+}
+
 const labels: Record<string, string> = {
   planned: '计划中',
   active: '进行中',
@@ -18,7 +30,9 @@ interface StatusBadgeProps {
 
 export function StatusBadge({ value }: StatusBadgeProps) {
   return (
-    <span className="inline-flex items-center rounded-full bg-ink/5 px-2.5 py-0.5 text-xs text-muted">
+    <span
+      className={`inline-flex items-center rounded-full px-2.5 py-0.5 text-xs ${tones[value] ?? 'bg-white/8 text-muted'}`}
+    >
       {labels[value] ?? value}
     </span>
   )

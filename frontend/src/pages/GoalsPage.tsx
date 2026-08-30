@@ -1,16 +1,16 @@
-import { Check, CheckCircle2, Crown, Flag, Pencil, Plus, Target, Trash2 } from 'lucide-react'
+import { CheckCircle2, Crown, Flag, Pencil, Plus, Skull, Target, Trash2 } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { GoalEditor } from '../components/goals/GoalEditor'
 import { TaskEditor } from '../components/goals/TaskEditor'
+import { TaskRow } from '../components/goals/TaskRow'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Panel } from '../components/ui/Panel'
 import { ProgressBar } from '../components/ui/ProgressBar'
-import { StatusBadge } from '../components/ui/StatusBadge'
 import { RewardCelebration } from '../components/feedback/RewardCelebration'
 import { useRewardCelebration } from '../components/feedback/useRewardCelebration'
 import { useAppStore } from '../store/AppStoreContext'
-import { TASK_DIFFICULTY_LABELS, type Goal, type Task } from '../types/models'
+import { type Goal, type Task } from '../types/models'
 import { cn } from '../utils/cn'
 import { formatDate } from '../utils/format'
 
@@ -47,6 +47,9 @@ export function GoalsPage() {
   const orphanGoals = data.goals.filter(
     (goal) => goal.parentId !== null && !data.goals.some((candidate) => candidate.id === goal.parentId),
   )
+  const allRoots = [...rootGoals, ...orphanGoals]
+  const activeBosses = allRoots.filter((goal) => goal.displayMode === 'boss' && goal.status === 'active')
+  const regularGoals = allRoots.filter((goal) => !activeBosses.includes(goal))
   const filteredTasks = data.tasks
     .filter((task) => settings.taskFilter === 'all' || task.status === settings.taskFilter)
     .toSorted((left, right) => {
@@ -89,6 +92,22 @@ export function GoalsPage() {
         </div>
       </header>
 
+      {activeBosses.length > 0 ? (
+        <section aria-label="Boss 讨伐战" className="space-y-4">
+          {activeBosses.map((boss) => (
+            <BossBanner
+              key={boss.id}
+              goal={boss}
+              childGoals={data.goals.filter((item) => item.parentId === boss.id)}
+              primaryGoalId={data.character.primaryGoalId}
+              onEdit={(goal) => setGoalEditor(goal)}
+              onDelete={(goal) => void handleDeleteGoal(goal)}
+              onMakePrimary={(goal) => void updateCharacter({ primaryGoalId: goal.id })}
+            />
+          ))}
+        </section>
+      ) : null}
+
       <section aria-labelledby="goals-heading">
         <div className="mb-3 flex items-end justify-between gap-3">
           <div><h2 id="goals-heading" className="text-lg font-semibold tracking-tight text-ink lg:text-xl">长期方向</h2><p className="mt-1 hidden text-xs text-faint lg:block">只保留父目标与子目标两层</p></div>
@@ -98,10 +117,18 @@ export function GoalsPage() {
           <EmptyState icon={<Flag size={22} />} title="还没有目标" description="添加一个值得持续推进的方向。" action={<Button onClick={() => setGoalEditor('new')}>添加目标</Button>} />
         ) : (
           <div className="space-y-4">
-            {[...rootGoals, ...orphanGoals].map((goal) => {
+            {regularGoals.map((goal) => {
               const children = data.goals.filter((item) => item.parentId === goal.id)
+              const boss = goal.displayMode === 'boss'
               return (
-                <Panel key={goal.id} className={cn('overflow-hidden', goal.id === data.character.primaryGoalId && 'ring-2 ring-primary/25')}>
+                <Panel
+                  key={goal.id}
+                  className={cn(
+                    'overflow-hidden',
+                    goal.id === data.character.primaryGoalId && 'ring-2 ring-primary/40 shadow-[0_0_36px_rgb(245_184_61/0.1)]',
+                    boss && 'ring-1 ring-danger/40 shadow-[inset_0_1px_0_rgb(255_255_255/0.05),0_0_36px_rgb(255_84_104/0.08)]',
+                  )}
+                >
                   <GoalRow
                     goal={goal}
                     primary={goal.id === data.character.primaryGoalId}
@@ -110,7 +137,7 @@ export function GoalsPage() {
                     onMakePrimary={() => void updateCharacter({ primaryGoalId: goal.id })}
                   />
                   {children.length > 0 ? (
-                    <div className="bg-canvas/60 px-4 py-2 sm:px-5">
+                    <div className="bg-raised/50 px-4 py-2 sm:px-5">
                       {children.map((child) => (
                         <GoalRow key={child.id} goal={child} child primary={child.id === data.character.primaryGoalId} onEdit={() => setGoalEditor(child)} onDelete={() => void handleDeleteGoal(child)} onMakePrimary={() => void updateCharacter({ primaryGoalId: child.id })} />
                       ))}
@@ -135,21 +162,17 @@ export function GoalsPage() {
         {filteredTasks.length === 0 ? (
           <EmptyState icon={<CheckCircle2 size={22} />} title="当前没有任务" description="添加下一件要做的事。" action={<Button onClick={() => setTaskEditor('new')}>添加任务</Button>} />
         ) : (
-          <ul className="divide-y divide-line overflow-hidden rounded-2xl bg-surface shadow-[0_1px_4px_rgb(0_0_0/0.04)]">
+          <ul className="divide-y divide-line overflow-hidden rounded-2xl bg-surface ring-1 ring-white/8">
             {filteredTasks.map((task) => (
-              <li key={task.id} className={cn('group flex items-center gap-3 px-3 py-4 sm:px-4', task.status === 'completed' && 'opacity-60')}>
-                {task.status !== 'completed' ? (
-                  <button type="button" aria-label={`完成任务：${task.name}`} className="flex size-9 shrink-0 items-center justify-center rounded-full border-2 border-ink/15 text-transparent transition-colors hover:border-primary hover:bg-primary-soft hover:text-primary" onClick={() => void handleComplete(task)}><Check size={18} strokeWidth={3} /></button>
-                ) : (
-                  <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-white"><Check size={18} strokeWidth={3} /></span>
-                )}
-                <button type="button" className="min-w-0 flex-1 text-left" onClick={() => setTaskEditor(task)}>
-                  <div className="flex flex-wrap items-center gap-2"><p className={cn('font-medium text-ink', task.status === 'completed' && 'line-through')}>{task.name}</p><StatusBadge value={task.status} /></div>
-                  <p className="mt-1 text-xs text-muted">{categoryNames.get(task.categoryId ?? '') ?? '未分类'} · {TASK_DIFFICULTY_LABELS[task.difficulty]} · {task.goalId ? data.goals.find((goal) => goal.id === task.goalId)?.name ?? '未知目标' : '未关联目标'} · {formatDate(task.dueDate)}</p>
-                </button>
-                <span className="hidden shrink-0 text-xs font-medium text-muted md:inline">+{task.rewards.exp} EXP</span>
-                <button type="button" aria-label={`删除任务：${task.name}`} className="rounded-full p-2 text-faint opacity-100 transition-colors hover:bg-danger-soft hover:text-danger sm:opacity-0 sm:group-hover:opacity-100" onClick={() => void handleDeleteTask(task)}><Trash2 size={16} /></button>
-              </li>
+              <TaskRow
+                key={task.id}
+                task={task}
+                categoryName={categoryNames.get(task.categoryId ?? '') ?? '未分类'}
+                goalName={task.goalId ? data.goals.find((goal) => goal.id === task.goalId)?.name ?? '未知目标' : '未关联目标'}
+                onComplete={(target) => void handleComplete(target)}
+                onEdit={setTaskEditor}
+                onDelete={(target) => void handleDeleteTask(target)}
+              />
             ))}
           </ul>
         )}
@@ -164,27 +187,73 @@ export function GoalsPage() {
 
 function TaskFilter({ value, onChange }: { value: string; onChange: (next: TaskFilterValue) => void }) {
   return (
-    <div className="flex w-fit gap-0.5 rounded-full bg-ink/[0.06] p-1" aria-label="任务筛选">
+    <div className="flex w-fit gap-0.5 rounded-full bg-raised p-1 ring-1 ring-white/8" aria-label="任务筛选">
       {FILTERS.map((filter) => (
-        <button key={filter.value} type="button" aria-pressed={value === filter.value} className={cn('min-h-8 rounded-full px-3.5 text-xs text-muted transition-colors', value === filter.value && 'bg-surface font-medium text-ink shadow-[0_1px_3px_rgb(0_0_0/0.1)]')} onClick={() => onChange(filter.value)}>{filter.label}</button>
+        <button key={filter.value} type="button" aria-pressed={value === filter.value} className={cn('min-h-8 rounded-full px-3.5 text-xs text-muted transition-colors', value === filter.value && 'bg-primary font-semibold text-[#241a04] shadow-[0_0_12px_rgb(245_184_61/0.3)]')} onClick={() => onChange(filter.value)}>{filter.label}</button>
       ))}
     </div>
   )
 }
 
+function BossBanner({ goal, childGoals, primaryGoalId, onEdit, onDelete, onMakePrimary }: { goal: Goal; childGoals: Goal[]; primaryGoalId: string | null; onEdit: (goal: Goal) => void; onDelete: (goal: Goal) => void; onMakePrimary: (goal: Goal) => void }) {
+  const primary = goal.id === primaryGoalId
+  return (
+    <Panel className="relative overflow-hidden ring-1 ring-danger/40 shadow-[inset_0_1px_0_rgb(255_255_255/0.05),0_0_44px_rgb(255_84_104/0.1)]">
+      <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(70%_90%_at_88%_8%,rgb(255_84_104/0.15),transparent_65%)]" />
+      <div className="relative p-5 sm:p-7">
+        <div className="flex flex-wrap items-start gap-x-4 gap-y-3 sm:gap-5">
+          <span className="flex size-12 shrink-0 animate-pulse-glow items-center justify-center rounded-2xl bg-danger-soft text-danger ring-1 ring-danger/40 sm:size-14">
+            <Skull className="size-6 sm:size-7" />
+          </span>
+          <div className="min-w-0 flex-1 basis-52">
+            <div className="flex flex-wrap items-center gap-2">
+              <p className="text-xs font-bold tracking-[0.2em] text-danger">BOSS 讨伐战</p>
+              {primary ? <span className="flex items-center gap-1 rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary"><Crown size={12} /> 主要</span> : null}
+            </div>
+            <h3 className="mt-1.5 text-xl font-bold tracking-tight text-ink sm:text-2xl">{goal.name}</h3>
+            {goal.description ? <p className="mt-2 text-sm leading-6 text-muted">{goal.description}</p> : null}
+          </div>
+          <div className="flex shrink-0 gap-1 max-sm:ml-auto">
+            {!primary ? <Button variant="ghost" className="min-h-9 px-2" aria-label={`设为主要目标：${goal.name}`} onClick={() => onMakePrimary(goal)}><Crown size={15} /></Button> : null}
+            <Button variant="ghost" className="min-h-9 px-2" aria-label={`编辑目标：${goal.name}`} onClick={() => onEdit(goal)}><Pencil size={15} /></Button>
+            <Button variant="ghost" className="min-h-9 px-2 hover:bg-danger-soft hover:text-danger" aria-label={`删除目标：${goal.name}`} onClick={() => onDelete(goal)}><Trash2 size={15} /></Button>
+          </div>
+        </div>
+        <div className="mt-6">
+          <div className="flex items-baseline justify-between gap-3">
+            <span className="text-sm text-muted">已推进 <strong className="tabular-nums text-ink">{goal.progress}%</strong></span>
+            <span className="text-sm font-bold tabular-nums text-danger">剩余 HP {100 - goal.progress}</span>
+          </div>
+          <ProgressBar className="mt-2" value={goal.progress} tone="danger" size="lg" />
+          <p className="mt-2 text-xs text-faint">完成关联任务即可削减 HP · 截止：{formatDate(goal.deadline)}</p>
+        </div>
+      </div>
+      {childGoals.length > 0 ? (
+        <div className="relative border-t border-danger/20 bg-raised/50 px-4 py-2 sm:px-5">
+          {childGoals.map((child) => (
+            <GoalRow key={child.id} goal={child} child primary={child.id === primaryGoalId} onEdit={() => onEdit(child)} onDelete={() => onDelete(child)} onMakePrimary={() => onMakePrimary(child)} />
+          ))}
+        </div>
+      ) : null}
+    </Panel>
+  )
+}
+
 function GoalRow({ goal, child = false, primary, onEdit, onDelete, onMakePrimary }: { goal: Goal; child?: boolean; primary: boolean; onEdit: () => void; onDelete: () => void; onMakePrimary: () => void }) {
+  const boss = goal.displayMode === 'boss'
   return (
     <div className={cn('p-4 sm:p-5', child && 'border-b border-line px-0 last:border-b-0')}>
       <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 flex-1">
           <div className="flex flex-wrap items-center gap-2">
             {child ? <span className="text-faint">↳</span> : null}
+            {boss ? <Skull size={child ? 16 : 19} className="shrink-0 text-danger" /> : null}
             <h3 className={cn('font-semibold tracking-tight text-ink', child ? 'text-base' : 'text-lg')}>{goal.name}</h3>
-            {goal.displayMode === 'boss' ? <span className="text-xs font-semibold text-danger">Boss</span> : null}
-            {primary ? <span className="flex items-center gap-1 text-xs font-medium text-primary"><Crown size={12} /> 主要</span> : null}
+            {boss ? <span className="rounded-full bg-danger-soft px-2 py-0.5 text-xs font-semibold text-danger">Boss</span> : null}
+            {primary ? <span className="flex items-center gap-1 rounded-full bg-primary-soft px-2 py-0.5 text-xs font-medium text-primary"><Crown size={12} /> 主要</span> : null}
           </div>
           {goal.description ? <p className="mt-2 text-sm leading-6 text-muted">{goal.description}</p> : null}
-          <div className="mt-4 max-w-2xl"><ProgressBar value={goal.progress} tone={goal.displayMode === 'boss' ? 'danger' : 'primary'} label={goal.displayMode === 'boss' ? `进度 ${goal.progress}% · 剩余 HP ${100 - goal.progress}` : `进度 ${goal.progress}%`} /></div>
+          <div className="mt-4 max-w-2xl"><ProgressBar value={goal.progress} tone={boss ? 'danger' : 'primary'} size="lg" label={boss ? `已推进 ${goal.progress}% · 剩余 HP ${100 - goal.progress}` : `进度 ${goal.progress}%`} /></div>
           <p className="mt-2 text-xs text-faint">截止：{formatDate(goal.deadline)}</p>
         </div>
         <div className="flex shrink-0 gap-1">

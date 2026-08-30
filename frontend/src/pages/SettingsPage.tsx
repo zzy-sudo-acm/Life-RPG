@@ -70,7 +70,7 @@ export function SettingsPage() {
         <p className="mt-2 text-sm text-muted">数据管理收纳在这里，不再占用主导航。</p>
       </header>
 
-      <section><h2 className="text-xl font-semibold tracking-tight text-ink">存档概览</h2><div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">{counts.map(([label, count]) => <div key={label} className="rounded-2xl bg-surface px-3 py-3 text-center shadow-[0_1px_4px_rgb(0_0_0/0.04)]"><strong className="block text-xl tabular-nums text-ink">{count}</strong><span className="mt-1 block text-xs text-muted">{label}</span></div>)}</div></section>
+      <section><h2 className="text-xl font-semibold tracking-tight text-ink">存档概览</h2><div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-5">{counts.map(([label, count]) => <div key={label} className="rounded-2xl bg-surface px-3 py-3 text-center ring-1 ring-white/8"><strong className="block text-xl tabular-nums text-primary">{count}</strong><span className="mt-1 block text-xs text-muted">{label}</span></div>)}</div></section>
 
       {(feedback || storeError) ? <p role={feedback?.tone === 'error' || storeError ? 'alert' : 'status'} className={`rounded-xl px-4 py-3 text-sm ${feedback?.tone === 'error' || storeError ? 'bg-danger-soft text-danger' : 'bg-primary-soft text-primary'}`}>{feedback?.message ?? storeError}</p> : null}
 

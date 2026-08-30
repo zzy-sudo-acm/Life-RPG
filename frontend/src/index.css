@@ -1,25 +1,31 @@
 @import "tailwindcss";
 
 @theme {
-  /* ── 极简浅色 · Apple 风 ───────────────────────────── */
-  --color-canvas: #f5f5f7;
-  --color-surface: #ffffff;
-  --color-raised: #e8e8ed;
-  --color-ink: #1d1d1f;
-  --color-muted: #6e6e73;
-  --color-faint: #86868b;
-  --color-line: rgb(0 0 0 / 0.08);
-  --color-primary: #0071e3;
-  --color-primary-deep: #0077ed;
-  --color-primary-soft: rgb(0 113 227 / 0.1);
-  --color-danger: #ff3b30;
-  --color-danger-soft: rgb(255 59 48 / 0.1);
+  /* ── 暗夜 RPG · 深空与熔金 ────────────────────────── */
+  --color-canvas: #0a0c13;
+  --color-surface: #131724;
+  --color-raised: #1c2233;
+  --color-ink: #edf0f8;
+  --color-muted: #98a1b6;
+  --color-faint: #5f6779;
+  --color-line: rgb(255 255 255 / 0.08);
+  --color-primary: #f5b83d;
+  --color-primary-deep: #d99a1f;
+  --color-primary-soft: rgb(245 184 61 / 0.12);
+  --color-danger: #ff5468;
+  --color-danger-soft: rgb(255 84 104 / 0.12);
+  --color-arcane: #8b7cf6;
+  --color-arcane-soft: rgb(139 124 246 / 0.14);
+  --color-verdant: #34d399;
 
   --font-sans: -apple-system, BlinkMacSystemFont, "SF Pro SC", "SF Pro Text", "PingFang SC", "Helvetica Neue", "Microsoft YaHei", system-ui, sans-serif;
 
-  /* ── 动效：只保留一次性的入场 ─────────────────────── */
+  /* ── 动效 ─────────────────────────────────────────── */
   --animate-fade-up: fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
   --animate-pop-in: pop-in 0.3s cubic-bezier(0.34, 1.2, 0.64, 1) both;
+  --animate-shimmer: shimmer 2.4s linear infinite;
+  --animate-pulse-glow: pulse-glow 2.2s ease-in-out infinite;
+  --animate-flash-out: flash-out 0.7s ease-out both;
 }
 
 @keyframes fade-up {
@@ -44,6 +50,39 @@
   }
 }
 
+/* 进度条流光：渐变背景缓慢平移 */
+@keyframes shimmer {
+  from {
+    background-position: 0% 0;
+  }
+  to {
+    background-position: -200% 0;
+  }
+}
+
+/* Boss 血条呼吸：低血量时的危机感 */
+@keyframes pulse-glow {
+  0%,
+  100% {
+    filter: brightness(1);
+    opacity: 1;
+  }
+  50% {
+    filter: brightness(1.35);
+    opacity: 0.85;
+  }
+}
+
+/* 任务完成时的全屏金光一闪 */
+@keyframes flash-out {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 :root {
   font-family: var(--font-sans);
   color: var(--color-ink);
@@ -51,7 +90,7 @@
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
-  color-scheme: light;
+  color-scheme: dark;
 }
 
 * {
@@ -68,6 +107,19 @@ body {
   min-height: 100vh;
   margin: 0;
   background-color: var(--color-canvas);
+}
+
+/* 深空极光：顶部一抹金紫色光晕，纯 CSS 无图片 */
+body::before {
+  position: fixed;
+  z-index: -1;
+  background:
+    radial-gradient(55% 38% at 50% -8%, rgb(245 184 61 / 0.08), transparent 72%),
+    radial-gradient(45% 32% at 88% 0%, rgb(139 124 246 / 0.07), transparent 70%),
+    radial-gradient(40% 30% at 8% 4%, rgb(94 177 239 / 0.04), transparent 70%);
+  content: '';
+  inset: 0;
+  pointer-events: none;
 }
 
 button,
@@ -93,14 +145,14 @@ input[type='checkbox']:not(:disabled) {
 }
 
 ::selection {
-  color: #ffffff;
+  color: #1a1405;
   background: var(--color-primary);
 }
 
-/* 纤细的中性滚动条 */
+/* 纤细的暗色滚动条 */
 * {
   scrollbar-width: thin;
-  scrollbar-color: rgb(0 0 0 / 0.22) transparent;
+  scrollbar-color: rgb(255 255 255 / 0.16) transparent;
 }
 *::-webkit-scrollbar {
   width: 8px;
@@ -108,7 +160,7 @@ input[type='checkbox']:not(:disabled) {
 }
 *::-webkit-scrollbar-thumb {
   border-radius: 8px;
-  background: rgb(0 0 0 / 0.18);
+  background: rgb(255 255 255 / 0.14);
 }
 *::-webkit-scrollbar-track {
   background: transparent;

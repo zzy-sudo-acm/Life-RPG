@@ -3,13 +3,13 @@ import { cn } from '../../utils/cn'
 
 const variants = {
   primary:
-    'bg-primary text-white font-semibold hover:bg-primary-deep active:opacity-80',
+    'bg-primary font-semibold text-[#241a04] shadow-[0_0_20px_rgb(245_184_61/0.22)] hover:brightness-110 active:opacity-80',
   secondary:
-    'bg-raised text-ink hover:bg-black/10',
+    'bg-raised text-ink ring-1 ring-white/8 hover:bg-white/10',
   ghost:
-    'bg-transparent text-muted hover:bg-ink/5 hover:text-ink',
+    'bg-transparent text-muted hover:bg-white/5 hover:text-ink',
   danger:
-    'bg-danger-soft text-danger hover:bg-danger/15',
+    'bg-danger-soft text-danger hover:bg-danger/20',
 } as const
 
 interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {

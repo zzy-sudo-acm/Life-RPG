@@ -63,7 +63,7 @@ export function Modal({
   return createPortal(
     <div
       ref={overlayRef}
-      className="fixed inset-0 z-50 flex h-[100dvh] items-end justify-center bg-black/40 p-0 sm:items-center sm:p-6"
+      className="fixed inset-0 z-50 flex h-[100dvh] items-end justify-center bg-black/70 p-0 backdrop-blur-sm sm:items-center sm:p-6"
       role="presentation"
       onMouseDown={(event) => {
         if (event.target === event.currentTarget && !closeDisabled) onClose()
@@ -73,7 +73,7 @@ export function Modal({
         role="dialog"
         aria-modal="true"
         aria-labelledby="dialog-title"
-        className={`flex max-h-full w-full animate-pop-in flex-col overflow-hidden rounded-t-3xl bg-surface shadow-[0_24px_70px_rgb(0_0_0/0.25)] sm:max-h-[92dvh] sm:rounded-2xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
+        className={`flex max-h-full w-full animate-pop-in flex-col overflow-hidden rounded-t-3xl bg-surface shadow-[0_24px_70px_rgb(0_0_0/0.6)] ring-1 ring-white/10 sm:max-h-[92dvh] sm:rounded-2xl ${wide ? 'sm:max-w-3xl' : 'sm:max-w-lg'}`}
       >
         <header className="z-10 flex shrink-0 items-start justify-between gap-4 border-b border-line px-4 py-3.5 sm:px-5 sm:py-4">
           <div>

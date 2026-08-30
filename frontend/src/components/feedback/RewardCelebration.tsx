@@ -52,48 +52,58 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
   const leveledUp = data.character.level > celebration.baseLevel
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(132px+env(safe-area-inset-bottom))] z-[60] flex justify-center px-4 lg:bottom-8">
-      <div
-        role="status"
-        className="pointer-events-auto w-full max-w-md animate-pop-in rounded-2xl bg-surface p-4 shadow-[0_12px_40px_rgb(0_0_0/0.16)] ring-1 ring-ink/5"
-      >
-        <div className="flex items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-white">
-            <Check size={18} strokeWidth={3} />
-          </span>
-          <div className="min-w-0 flex-1">
-            <p className="text-sm font-semibold text-ink">任务完成</p>
-            <p className="truncate text-xs text-muted">{celebration.title}</p>
-          </div>
-          {leveledUp ? (
-            <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary">
-              <Trophy size={13} />
-              Lv.{celebration.baseLevel} → {data.character.level}
-            </span>
-          ) : null}
-          <button
-            type="button"
-            aria-label="关闭奖励提示"
-            className="shrink-0 rounded-full p-1.5 text-faint transition-colors hover:bg-ink/5 hover:text-ink"
-            onClick={onClose}
-          >
-            <X size={16} />
-          </button>
-        </div>
-        {rewardLines.length > 0 ? (
-          <ul className="mt-3 flex flex-wrap gap-1.5">
-            {rewardLines.map(({ icon: Icon, text }) => (
-              <li
-                key={text}
-                className="flex items-center gap-1 rounded-full bg-ink/[0.05] px-2.5 py-1 text-xs font-medium text-ink"
+    <>
+      {/* 全屏金光一闪：完成动作的瞬间反馈，不阻断操作 */}
+      <div className="pointer-events-none fixed inset-0 z-[55] animate-flash-out bg-[radial-gradient(60%_50%_at_50%_62%,rgb(245_184_61/0.22),transparent_70%)]" />
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(132px+env(safe-area-inset-bottom))] z-[60] flex justify-center px-4 lg:bottom-8">
+        <div
+          role="status"
+          className="pointer-events-auto w-full max-w-md animate-pop-in overflow-hidden rounded-2xl bg-surface shadow-[0_16px_48px_rgb(0_0_0/0.55),0_0_32px_rgb(245_184_61/0.12)] ring-1 ring-primary/30"
+        >
+          <div className="h-0.5 w-full bg-[linear-gradient(90deg,#d99a1f,#f5b83d,#ffd97a,#f5b83d,#d99a1f)] bg-[length:200%_100%] animate-shimmer" />
+          <div className="p-4">
+            <div className="flex items-center gap-3">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-[#241a04] shadow-[0_0_16px_rgb(245_184_61/0.5)]">
+                {leveledUp ? <Trophy size={18} strokeWidth={2.5} /> : <Check size={18} strokeWidth={3} />}
+              </span>
+              <div className="min-w-0 flex-1">
+                <p className="text-sm font-semibold text-ink">{leveledUp ? '等级提升！' : '任务完成'}</p>
+                <p className="truncate text-xs text-muted">{celebration.title}</p>
+              </div>
+              {leveledUp ? (
+                <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-[#241a04] shadow-[0_0_18px_rgb(245_184_61/0.55)]">
+                  Lv.{celebration.baseLevel} → {data.character.level}
+                </span>
+              ) : null}
+              <button
+                type="button"
+                aria-label="关闭奖励提示"
+                className="shrink-0 rounded-full p-1.5 text-faint transition-colors hover:bg-white/5 hover:text-ink"
+                onClick={onClose}
               >
-                <Icon size={12} className="text-muted" />
-                {text}
-              </li>
-            ))}
-          </ul>
-        ) : null}
+                <X size={16} />
+              </button>
+            </div>
+            {rewardLines.length > 0 ? (
+              <ul className="mt-3 flex flex-wrap gap-1.5">
+                {rewardLines.map(({ icon: Icon, text }, index) => (
+                  <li
+                    key={text}
+                    className={
+                      index === 0
+                        ? 'flex items-center gap-1 rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary'
+                        : 'flex items-center gap-1 rounded-full bg-white/6 px-2.5 py-1 text-xs font-medium text-ink'
+                    }
+                  >
+                    <Icon size={12} className={index === 0 ? 'text-primary' : 'text-muted'} />
+                    {text}
+                  </li>
+                ))}
+              </ul>
+            ) : null}
+          </div>
+        </div>
       </div>
-    </div>
+    </>
   )
 }

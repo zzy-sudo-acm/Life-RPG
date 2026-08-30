@@ -10,15 +10,18 @@ interface ProgressBarProps {
   className?: string
 }
 
+/** 渐变填充 + 流光动画 + 末端辉光；danger 带呼吸，给 Boss 血条危机感。 */
 const tones = {
-  primary: 'bg-primary',
-  danger: 'bg-danger',
+  primary:
+    'bg-[linear-gradient(90deg,#d99a1f,#f5b83d,#ffd97a,#f5b83d,#d99a1f)] bg-[length:200%_100%] animate-shimmer shadow-[0_0_8px_rgb(245_184_61/0.45)]',
+  danger:
+    'bg-[linear-gradient(90deg,#c92a42,#ff5468,#ff8f9d,#ff5468,#c92a42)] bg-[length:200%_100%] animate-shimmer animate-pulse-glow shadow-[0_0_10px_rgb(255_84_104/0.5)]',
 } as const
 
 const sizes = {
-  sm: 'h-1',
-  md: 'h-1.5',
-  lg: 'h-2',
+  sm: 'h-1.5',
+  md: 'h-2',
+  lg: 'h-3',
 } as const
 
 export function ProgressBar({
@@ -39,7 +42,7 @@ export function ProgressBar({
         </div>
       ) : null}
       <div
-        className={cn('overflow-hidden rounded-full bg-ink/8', sizes[size])}
+        className={cn('overflow-hidden rounded-full bg-white/8', sizes[size])}
         role="progressbar"
         aria-valuemin={0}
         aria-valuemax={max}
