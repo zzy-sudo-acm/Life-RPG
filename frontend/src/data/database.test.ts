@@ -10,7 +10,7 @@ describe('IndexedDB data layer v2', () => {
     expect(data.skillCategories.map((category) => category.name)).toEqual(['计算机', '数学', '语言', '运动'])
     expect(data.character.primaryGoalId).toBe(data.goals[0]?.id)
     expect(data.goals[0]?.displayMode).toBe('boss')
-    expect(data.tasks[0]?.categoryId).toBe('category-mathematics')
+    expect(data.tasks[0]?.categoryId).toBe('category-language')
     expect(data.tasks[0]?.rewards.goalProgress).toBe(10)
     expect('equipment' in data).toBe(false)
     expect('bosses' in data).toBe(false)

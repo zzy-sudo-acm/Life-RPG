@@ -117,23 +117,18 @@
     {
       "id": "task-first-step",
       "goalId": "goal-reading",
-      "categoryId": "category-mathematics",
-      "name": "数学强化 2h",
-      "description": "完成一个章节并记录错题。",
+      "categoryId": "category-language",
+      "name": "阅读 30 分钟",
+      "description": "读完一个章节并记录摘抄。",
       "dueDate": null,
       "difficulty": "medium",
       "status": "todo",
       "rewards": {
-        "exp": 30,
+        "exp": 25,
         "stats": {
           "intelligence": 0.5
         },
-        "skills": [
-          {
-            "skillId": "skill-math",
-            "amount": 6
-          }
-        ],
+        "skills": [],
         "goalProgress": 10
       },
       "completedAt": null,
