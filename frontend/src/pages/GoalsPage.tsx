@@ -21,6 +21,8 @@ const FILTERS = [
   { value: 'completed', label: '已完成' },
 ] as const
 
+type TaskFilterValue = (typeof FILTERS)[number]['value']
+
 export function GoalsPage() {
   const {
     data,
@@ -72,22 +74,24 @@ export function GoalsPage() {
     }
   }
 
+  const changeFilter = (next: TaskFilterValue) => updateSettings({ taskFilter: next })
+
   return (
-    <div className="space-y-8">
-      <header className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
+    <div className="space-y-6 lg:space-y-8">
+      <header className="flex items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-semibold tracking-tight text-ink">目标</h1>
-          <p className="mt-2 text-sm text-muted">长期目标、子目标与 Boss 模式都使用同一套进度。</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink lg:text-3xl">目标</h1>
+          <p className="mt-2 hidden text-sm text-muted lg:block">长期目标、子目标与 Boss 模式都使用同一套进度。</p>
         </div>
-        <div className="flex gap-2">
-          <Button variant="secondary" icon={<Plus size={16} />} onClick={() => setTaskEditor('new')}>添加任务</Button>
-          <Button icon={<Target size={16} />} onClick={() => setGoalEditor('new')}>添加目标</Button>
+        <div className="flex shrink-0 gap-2">
+          <Button variant="secondary" className="min-h-9 px-3 lg:min-h-10 lg:px-4" icon={<Plus size={16} />} onClick={() => setTaskEditor('new')}>添加任务</Button>
+          <Button className="min-h-9 px-3 lg:min-h-10 lg:px-4" icon={<Target size={16} />} onClick={() => setGoalEditor('new')}>添加目标</Button>
         </div>
       </header>
 
       <section aria-labelledby="goals-heading">
         <div className="mb-3 flex items-end justify-between gap-3">
-          <div><h2 id="goals-heading" className="text-xl font-semibold tracking-tight text-ink">长期方向</h2><p className="mt-1 text-xs text-faint">只保留父目标与子目标两层</p></div>
+          <div><h2 id="goals-heading" className="text-lg font-semibold tracking-tight text-ink lg:text-xl">长期方向</h2><p className="mt-1 hidden text-xs text-faint lg:block">只保留父目标与子目标两层</p></div>
           <span className="text-xs text-muted">{data.goals.filter((goal) => goal.status === 'active').length} 个进行中</span>
         </div>
         {data.goals.length === 0 ? (
@@ -120,13 +124,13 @@ export function GoalsPage() {
       </section>
 
       <section aria-labelledby="tasks-heading">
-        <div className="mb-3 flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
-          <div><h2 id="tasks-heading" className="text-xl font-semibold tracking-tight text-ink">任务</h2><p className="mt-1 text-xs text-faint">完成后自动结算并推进关联目标</p></div>
-          <div className="flex w-fit gap-0.5 rounded-full bg-ink/[0.06] p-1" aria-label="任务筛选">
-            {FILTERS.map((filter) => (
-              <button key={filter.value} type="button" aria-pressed={settings.taskFilter === filter.value} className={cn('min-h-8 rounded-full px-3.5 text-xs text-muted transition-colors', settings.taskFilter === filter.value && 'bg-surface font-medium text-ink shadow-[0_1px_3px_rgb(0_0_0/0.1)]')} onClick={() => updateSettings({ taskFilter: filter.value })}>{filter.label}</button>
-            ))}
-          </div>
+        <div className="mb-3 flex items-end justify-between gap-3">
+          <div><h2 id="tasks-heading" className="text-lg font-semibold tracking-tight text-ink lg:text-xl">任务</h2><p className="mt-1 hidden text-xs text-faint lg:block">完成后自动结算并推进关联目标</p></div>
+          <div className="hidden lg:block"><TaskFilter value={settings.taskFilter} onChange={changeFilter} /></div>
+        </div>
+        {/* 移动端：筛选器吸顶，长列表滚动时随手可切 */}
+        <div className="sticky top-14 z-20 -mx-4 mb-3 bg-canvas/85 px-4 py-2 backdrop-blur-xl sm:-mx-6 sm:px-6 lg:hidden">
+          <TaskFilter value={settings.taskFilter} onChange={changeFilter} />
         </div>
         {filteredTasks.length === 0 ? (
           <EmptyState icon={<CheckCircle2 size={22} />} title="当前没有任务" description="添加下一件要做的事。" action={<Button onClick={() => setTaskEditor('new')}>添加任务</Button>} />
@@ -154,6 +158,16 @@ export function GoalsPage() {
       {goalEditor !== null ? <GoalEditor goal={goalEditor === 'new' ? null : goalEditor} goals={data.goals} onClose={() => setGoalEditor(null)} onSave={(goal) => saveEntity('goals', goal)} /> : null}
       {taskEditor !== null ? <TaskEditor task={taskEditor === 'new' ? null : taskEditor} goals={data.goals} categories={data.skillCategories} skills={data.skills} onClose={() => setTaskEditor(null)} onSave={(task) => saveEntity('tasks', task)} /> : null}
       <RewardCelebration celebration={celebration} onClose={dismiss} />
+    </div>
+  )
+}
+
+function TaskFilter({ value, onChange }: { value: string; onChange: (next: TaskFilterValue) => void }) {
+  return (
+    <div className="flex w-fit gap-0.5 rounded-full bg-ink/[0.06] p-1" aria-label="任务筛选">
+      {FILTERS.map((filter) => (
+        <button key={filter.value} type="button" aria-pressed={value === filter.value} className={cn('min-h-8 rounded-full px-3.5 text-xs text-muted transition-colors', value === filter.value && 'bg-surface font-medium text-ink shadow-[0_1px_3px_rgb(0_0_0/0.1)]')} onClick={() => onChange(filter.value)}>{filter.label}</button>
+      ))}
     </div>
   )
 }

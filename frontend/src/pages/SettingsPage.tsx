@@ -66,7 +66,7 @@ export function SettingsPage() {
     <div className="space-y-7">
       <header>
         <Link to="/character" className="text-xs font-medium text-primary">← 返回角色</Link>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-ink">设置</h1>
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-ink lg:text-3xl">设置</h1>
         <p className="mt-2 text-sm text-muted">数据管理收纳在这里，不再占用主导航。</p>
       </header>
 
