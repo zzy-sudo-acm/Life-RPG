@@ -1,3 +1,4 @@
+import { useId } from 'react'
 import { STAT_KEYS, STAT_LABELS, type StatValues } from '../../types/models'
 import { STAT_HEX } from './statTheme'
 
@@ -9,8 +10,9 @@ interface RadarChartProps {
 
 const RING_STEPS = [0.25, 0.5, 0.75, 1]
 
-/** 五维属性雷达图：纯 SVG 无依赖，数据多边形用熔金渐变填充。 */
+/** 五维属性雷达图：浅色刻度与半透明森林绿区域。 */
 export function RadarChart({ values, size = 280 }: RadarChartProps) {
+  const fillId = useId()
   const center = size / 2
   const radius = size / 2 - 58
   const maxValue = Math.max(100, ...STAT_KEYS.map((key) => values[key]))
@@ -35,36 +37,36 @@ export function RadarChart({ values, size = 280 }: RadarChartProps) {
       aria-label={STAT_KEYS.map((key) => `${STAT_LABELS[key]} ${values[key]}`).join('，')}
     >
       <defs>
-        <radialGradient id="radar-fill" cx="50%" cy="50%" r="65%">
-          <stop offset="0%" stopColor="#f5b83d" stopOpacity="0.45" />
-          <stop offset="100%" stopColor="#f5b83d" stopOpacity="0.08" />
+        <radialGradient id={fillId} cx="50%" cy="50%" r="65%">
+          <stop offset="0%" stopColor="#32745c" stopOpacity="0.24" />
+          <stop offset="100%" stopColor="#32745c" stopOpacity="0.07" />
         </radialGradient>
       </defs>
 
+      <polygon points={polygon(() => 1)} fill="#f5f7f4" />
       {RING_STEPS.map((step) => (
         <polygon
           key={step}
           points={polygon(() => step)}
-          fill={step === 1 ? 'rgb(255 255 255 / 0.02)' : 'none'}
-          stroke="rgb(255 255 255 / 0.09)"
+          fill="none"
+          stroke="#e3e9e2"
           strokeWidth="1"
         />
       ))}
       {STAT_KEYS.map((key, index) => {
         const [x, y] = point(index, 1)
-        return <line key={key} x1={center} y1={center} x2={x} y2={y} stroke="rgb(255 255 255 / 0.07)" strokeWidth="1" />
+        return <line key={key} x1={center} y1={center} x2={x} y2={y} stroke="#e3e9e2" strokeWidth="1" />
       })}
 
       <polygon
         points={polygon((index) => dataPoints[index]?.ratio ?? 0)}
-        fill="url(#radar-fill)"
-        stroke="#f5b83d"
+        fill={`url(#${fillId})`}
+        stroke="#32745c"
         strokeWidth="1.5"
         strokeLinejoin="round"
-        style={{ filter: 'drop-shadow(0 0 6px rgb(245 184 61 / 0.4))' }}
       />
       {dataPoints.map(({ key, position }) => (
-        <circle key={key} cx={position[0]} cy={position[1]} r="3" fill={STAT_HEX[key]} stroke="#0a0c13" strokeWidth="1.5" />
+        <circle key={key} cx={position[0]} cy={position[1]} r="3" fill={STAT_HEX[key]} stroke="white" strokeWidth="1.5" />
       ))}
 
       {/* 标签双行（名称 + 数值），窄屏下宽度最紧的侧面标签也不溢出 */}
@@ -74,7 +76,7 @@ export function RadarChart({ values, size = 280 }: RadarChartProps) {
         const anchor = cos > 0.3 ? 'start' : cos < -0.3 ? 'end' : 'middle'
         return (
           <text key={key} x={x} y={y} textAnchor={anchor} fontSize="11" dominantBaseline="middle">
-            <tspan fill="#98a1b6">{STAT_LABELS[key]}</tspan>
+            <tspan fill="#77847c">{STAT_LABELS[key]}</tspan>
             <tspan x={x} dy="1.25em" fill={STAT_HEX[key]} fontWeight="700">{values[key]}</tspan>
           </text>
         )

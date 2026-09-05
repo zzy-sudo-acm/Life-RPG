@@ -68,7 +68,7 @@ export function GoalEditor({ goal, goals, onClose, onSave }: GoalEditorProps) {
     <Modal
       open
       title={goal === null ? '添加目标' : '编辑目标'}
-      description="目标只保留一层父子关系；Boss 模式只是同一进度的 RPG 展示。"
+      description="给未来定个方向，再用每天的小行动慢慢靠近。"
       onClose={onClose}
       closeDisabled={isSubmitting}
     >
@@ -92,7 +92,7 @@ export function GoalEditor({ goal, goals, onClose, onSave }: GoalEditorProps) {
           <FormField label="展示模式" htmlFor="goal-display-mode">
             <select id="goal-display-mode" name="displayMode" defaultValue={goal?.displayMode ?? 'standard'} className={inputClassName}>
               <option value="standard">普通目标</option>
-              <option value="boss">Boss 目标 👹</option>
+              <option value="boss">挑战目标</option>
             </select>
           </FormField>
           <FormField label="截止日期（可选）" htmlFor="goal-deadline">

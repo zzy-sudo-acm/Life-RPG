@@ -12,7 +12,7 @@ interface RewardCelebrationProps {
 
 /**
  * 任务结算后的轻量 toast：浮在底部导航之上，不遮挡页面、不打断连续操作，
- * 片刻后自动消失，点按任意位置可立即关闭。
+ * 片刻后自动消失，也可通过关闭按钮立即关闭。
  */
 export function RewardCelebration({ celebration, onClose }: RewardCelebrationProps) {
   const { data } = useAppStore()
@@ -53,17 +53,15 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
 
   return (
     <>
-      {/* 全屏金光一闪：完成动作的瞬间反馈，不阻断操作 */}
-      <div className="pointer-events-none fixed inset-0 z-[55] animate-flash-out bg-[radial-gradient(60%_50%_at_50%_62%,rgb(245_184_61/0.22),transparent_70%)]" />
-      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(132px+env(safe-area-inset-bottom))] z-[60] flex justify-center px-4 lg:bottom-8">
+      <div className="pointer-events-none fixed inset-x-0 bottom-[calc(88px+env(safe-area-inset-bottom))] z-[60] flex justify-center px-4 lg:bottom-8">
         <div
           role="status"
-          className="pointer-events-auto w-full max-w-md animate-pop-in overflow-hidden rounded-2xl bg-surface shadow-[0_16px_48px_rgb(0_0_0/0.55),0_0_32px_rgb(245_184_61/0.12)] ring-1 ring-primary/30"
+          className="pointer-events-auto w-full max-w-md animate-pop-in overflow-hidden rounded-[14px] border border-primary/20 bg-surface shadow-[0_8px_32px_rgb(36_62_53/0.12)] motion-reduce:animate-none"
         >
-          <div className="h-0.5 w-full bg-[linear-gradient(90deg,#d99a1f,#f5b83d,#ffd97a,#f5b83d,#d99a1f)] bg-[length:200%_100%] animate-shimmer" />
+          <div className="h-0.5 w-full bg-primary" />
           <div className="p-4">
             <div className="flex items-center gap-3">
-              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-[#241a04] shadow-[0_0_16px_rgb(245_184_61/0.5)]">
+              <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary text-white">
                 {leveledUp ? <Trophy size={18} strokeWidth={2.5} /> : <Check size={18} strokeWidth={3} />}
               </span>
               <div className="min-w-0 flex-1">
@@ -71,14 +69,14 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
                 <p className="truncate text-xs text-muted">{celebration.title}</p>
               </div>
               {leveledUp ? (
-                <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary px-2.5 py-1 text-xs font-bold text-[#241a04] shadow-[0_0_18px_rgb(245_184_61/0.55)]">
+                <span className="flex shrink-0 items-center gap-1 rounded-full bg-primary-soft px-2.5 py-1 text-xs font-bold text-primary">
                   Lv.{celebration.baseLevel} → {data.character.level}
                 </span>
               ) : null}
               <button
                 type="button"
                 aria-label="关闭奖励提示"
-                className="shrink-0 rounded-full p-1.5 text-faint transition-colors hover:bg-white/5 hover:text-ink"
+                className="flex size-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-raised hover:text-ink focus-visible:outline-2 focus-visible:outline-primary"
                 onClick={onClose}
               >
                 <X size={16} />
@@ -92,7 +90,7 @@ export function RewardCelebration({ celebration, onClose }: RewardCelebrationPro
                     className={
                       index === 0
                         ? 'flex items-center gap-1 rounded-full bg-primary-soft px-2.5 py-1 text-xs font-semibold text-primary'
-                        : 'flex items-center gap-1 rounded-full bg-white/6 px-2.5 py-1 text-xs font-medium text-ink'
+                        : 'flex items-center gap-1 rounded-full bg-raised px-2.5 py-1 text-xs font-medium text-ink'
                     }
                   >
                     <Icon size={12} className={index === 0 ? 'text-primary' : 'text-muted'} />

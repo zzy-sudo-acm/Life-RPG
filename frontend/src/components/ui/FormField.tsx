@@ -29,12 +29,12 @@ export function FormField({
           {error}
         </p>
       ) : null}
-      {hint ? <p className="text-xs text-faint">{hint}</p> : null}
+      {hint ? <p className="text-xs text-muted">{hint}</p> : null}
     </div>
   )
 }
 
 export const inputClassName =
-  'min-h-11 w-full rounded-xl border border-transparent bg-raised px-3 text-sm text-ink outline-none transition-colors placeholder:text-faint focus:border-primary/50 focus:ring-4 focus:ring-primary/15 disabled:opacity-50'
+  'min-h-11 w-full rounded-lg border border-line bg-surface px-3 text-base text-ink outline-none transition-colors placeholder:text-faint focus:border-primary focus:ring-2 focus:ring-primary/15 disabled:cursor-not-allowed disabled:bg-raised disabled:opacity-60 sm:text-sm'
 
 export const textareaClassName = `${inputClassName} min-h-24 resize-y py-2.5`

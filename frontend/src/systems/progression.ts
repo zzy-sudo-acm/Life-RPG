@@ -13,6 +13,8 @@ import type {
   Task,
 } from '../types/models'
 import { evaluateAchievementTriggers } from './achievements'
+import { localDateString } from '../utils/format'
+import { calcCompletionStreak } from '../utils/streak'
 
 const CHARACTER_EXP_GROWTH = 1.2
 const SKILL_EXP_GROWTH = 1.25
@@ -221,28 +223,18 @@ function makeEvent(
   }
 }
 
-function completionStreak(tasks: readonly Task[]): number {
-  const days = [...new Set(
-    tasks.flatMap((task) => task.completedAt === null ? [] : [task.completedAt.slice(0, 10)]),
-  )].toSorted((left, right) => right.localeCompare(left))
-  if (days.length === 0) return 0
-
-  let streak = 1
-  let cursor = new Date(`${days[0]}T00:00:00Z`)
-  for (const day of days.slice(1)) {
-    cursor = new Date(cursor.getTime() - 86_400_000)
-    if (day !== cursor.toISOString().slice(0, 10)) break
-    streak += 1
-  }
-  return streak
-}
-
 function unlockAutomaticAchievements(data: AppData, occurredAt: string): AppData {
   const signals = [
     { event: 'task.completed', value: data.tasks.filter((task) => task.status === 'completed').length },
     { event: 'goal.completed', value: data.goals.filter((goal) => goal.status === 'completed').length },
     { event: 'skill.level', value: data.skills.reduce((maximum, skill) => Math.max(maximum, skill.level), 0) },
-    { event: 'streak.days', value: completionStreak(data.tasks) },
+    {
+      event: 'streak.days',
+      value: calcCompletionStreak(
+        data.tasks.map((task) => task.completedAt),
+        localDateString(new Date(occurredAt)),
+      ),
+    },
   ]
   let achievements = data.achievements
   const unlockedIds: string[] = []

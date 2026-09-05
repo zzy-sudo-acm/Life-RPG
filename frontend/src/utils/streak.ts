@@ -18,7 +18,7 @@ export function calcCompletionStreak(
   const days = new Set(
     completedDates
       .filter((value): value is string => value !== null)
-      .map((value) => value.slice(0, 10)),
+      .map((value) => value.length === 10 ? value : localDateString(new Date(value))),
   )
   let cursor = days.has(today) ? today : shiftLocalDate(today, -1)
   let streak = 0
